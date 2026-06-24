@@ -1,5 +1,18 @@
 # realistic-map-generator
 
+# Compilation commands
+
+```bash
+cmake -B build -G Ninja
+cmake --build build
+```
+
+# How to run
+
+```bash
+./build/src/realistic_map_generator
+```
+
 # Installation
 
 Linux:
