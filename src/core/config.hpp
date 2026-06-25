@@ -10,5 +10,16 @@ namespace config
         inline constexpr const char* TITLE = "Realistic 2D Map Generator";
         inline constexpr const int FPS = 24;
     }
+
+    namespace generation
+    {
+        inline constexpr int NUM_POINTS = 100;
+        inline constexpr int INSIDE_PADDING = 15;
+    }
+
+    namespace renderer
+    {
+        inline constexpr int POINT_RADIUS = 5;
+    }
 }
 
