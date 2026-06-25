@@ -18,15 +18,8 @@ int main()
         {
             ClearBackground(RAYWHITE);
 
-            DrawCircle(
-                math::getRandomInt(engine, 0, config::window::WINDOW_WIDTH),
-                math::getRandomInt(engine, 0, config::window::WINDOW_HEIGHT),
-                math::getRandomFloat(engine, 10.0f, 50.0f),
-                Color{static_cast<unsigned char>(math::getRandomInt(engine, 0, 255)),
-                      static_cast<unsigned char>(math::getRandomInt(engine, 0, 255)),
-                      static_cast<unsigned char>(math::getRandomInt(engine, 0, 255)),
-                      255}
-            );
+
+
         }
         EndDrawing();
     }
