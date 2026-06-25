@@ -9,16 +9,14 @@ namespace math
     using UnifFloatDistribution = std::uniform_real_distribution<float>;
 
 
-    inline float getRandomFloat(RngEngine& engine, float min, float max)
+    inline float getRandomFloat(RngEngine& engine, UnifFloatDistribution& range)
     {
-        UnifFloatDistribution dist(min, max);
-        return dist(engine);
+        return range(engine);
     }
 
-    inline int getRandomInt(RngEngine engine, int min, int max)
+    inline int getRandomInt(RngEngine& engine, UnifIntDistribution& range)
     {
-        UnifIntDistribution dist(min, max);
-        return dist(engine);
+        return range(engine);
     }
 
 }
