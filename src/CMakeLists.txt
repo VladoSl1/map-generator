@@ -6,6 +6,9 @@ target_sources(realistic_map_generator
 		main.cpp
 		core/config.hpp
 		core/utils/random.hpp
+		generation/pipeline.hpp
+		rendering/renderer.hpp
+
 )
 
 target_include_directories(realistic_map_generator
