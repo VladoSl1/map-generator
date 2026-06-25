@@ -24,3 +24,4 @@ FetchContent_MakeAvailable(raylib)
 # ---------------------------------------------
 
 add_subdirectory(src)
+add_subdirectory(external)

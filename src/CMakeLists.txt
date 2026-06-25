@@ -9,4 +9,5 @@ target_sources(realistic_map_generator
 target_link_libraries(realistic_map_generator
 	PRIVATE
 		raylib
+		Delaunator
 )
