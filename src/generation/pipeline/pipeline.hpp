@@ -1,22 +1,20 @@
 #pragma once
 
-#include "core/config.hpp"
 #include "core/math/math.hpp"
-#include "core/utils/random.hpp"
-#include "generation/pipeline/point_sampling.hpp"
+
+#include <vector>
 
 namespace generation
 {
     class GenerationPipeline
     {
     public:
+
+        std::vector<math::Point2Di> points;
+        std::vector<math::TriangleI> triangles;
+
         GenerationPipeline(int width, int height, int worldSeed)
-            : m_width(width), m_height(height), m_worldSeed(worldSeed)
-        {
-        }
-
-        std::vector<math::Point2D> points;
-
+            : m_width(width), m_height(height), m_worldSeed(worldSeed) {}
 
         void generate();
 

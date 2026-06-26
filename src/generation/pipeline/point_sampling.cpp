@@ -6,19 +6,21 @@
 
 namespace generation::pipeline
 {
-    void samplePoints(std::vector<math::Point2D> *points, math::RngEngine rngEngine,
-                      math::UnifIntDistribution& widthInterval,
-                      math::UnifIntDistribution& heightInterval, int numPoints)
+     std::vector<math::Point2Di> samplePoints(math::RngEngine rngEngine,
+                                              math::UnifIntDistribution& widthInterval,
+                                              math::UnifIntDistribution& heightInterval, int numPoints)
     {
-        points->clear();
-        points->reserve(numPoints);
+        std::vector<math::Point2Di> points;
+        points.reserve(numPoints);
 
         for (int i = 0; i < numPoints; ++i)
         {
             int x = math::getRandomInt(rngEngine, widthInterval);
             int y = math::getRandomInt(rngEngine, heightInterval);
-            points->emplace_back(x, y);
+            points.emplace_back(x, y);
         }
+
+        return points;
     }
 }
 

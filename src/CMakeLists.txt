@@ -6,10 +6,16 @@ target_sources(realistic_map_generator
 		main.cpp
 		core/config.hpp
 		core/utils/random.hpp
+
 		generation/pipeline/pipeline.hpp
 		generation/pipeline/pipeline.cpp
+
 		generation/pipeline/point_sampling.hpp
 		generation/pipeline/point_sampling.cpp
+
+		generation/pipeline/delaunay_triangulation.hpp
+		generation/pipeline/delaunay_triangulation.cpp
+
 		rendering/renderer.hpp
 		rendering/renderer.cpp
 

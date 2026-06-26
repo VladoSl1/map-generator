@@ -31,6 +31,8 @@ int main()
             ClearBackground(RAYWHITE);
 
             renderer::renderPoints(pipeline.points);
+            renderer::renderTriangles(pipeline.points, pipeline.triangles);
+
         }
         EndDrawing();
     }
