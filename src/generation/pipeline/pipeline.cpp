@@ -6,6 +6,7 @@
 
 #include "core/config.hpp"
 
+#include "core/debug.hpp"
 
 namespace generation
 {
@@ -21,7 +22,7 @@ namespace generation
 
         triangles = pipeline::triangulate(points);
 
-
+        pipeline::sortTriangles(triangles);
 
     }
 }
