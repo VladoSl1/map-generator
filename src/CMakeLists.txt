@@ -1,33 +1,40 @@
+add_library(map_gen_lib STATIC)
 
-add_executable(realistic_map_generator)
+target_sources(map_gen_lib
+    PRIVATE
+        core/config.hpp
+        core/utils/random.hpp
+        core/math/math.hpp
 
-target_sources(realistic_map_generator
-	PRIVATE
-		main.cpp
-		core/config.hpp
-		core/utils/random.hpp
+        generation/pipeline/pipeline.hpp
+        generation/pipeline/pipeline.cpp
 
-		generation/pipeline/pipeline.hpp
-		generation/pipeline/pipeline.cpp
+        generation/pipeline/point_sampling.hpp
+        generation/pipeline/point_sampling.cpp
 
-		generation/pipeline/point_sampling.hpp
-		generation/pipeline/point_sampling.cpp
+        generation/pipeline/delaunay_triangulation.hpp
+        generation/pipeline/delaunay_triangulation.cpp
 
-		generation/pipeline/delaunay_triangulation.hpp
-		generation/pipeline/delaunay_triangulation.cpp
-
-		rendering/renderer.hpp
-		rendering/renderer.cpp
-
+        rendering/renderer.hpp
+        rendering/renderer.cpp
 )
 
-target_include_directories(realistic_map_generator
-	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}
+# use PUBLIC so both the app and the tests can see these includes
+target_include_directories(map_gen_lib
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+target_link_libraries(map_gen_lib
+    PUBLIC
+        raylib
+        Delaunator
+)
+
+add_executable(realistic_map_generator
+	main.cpp
+)
 target_link_libraries(realistic_map_generator
 	PRIVATE
-		raylib
-		Delaunator
+		map_gen_lib
 )

@@ -1,5 +1,3 @@
-include(GoogleTest)
-
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     include(FetchContent)
@@ -15,6 +13,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(unit_tests
         PRIVATE
             gtest_main
+            map_gen_lib
     )
 
     enable_testing()
