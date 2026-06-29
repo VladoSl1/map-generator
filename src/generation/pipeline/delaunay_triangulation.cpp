@@ -31,19 +31,33 @@ namespace generation::pipeline
 
     void bucketSortTriangles(std::vector<math::TriangleI>& triangles, size_t vertexIndex)
     {
-        std::vector<std::vector<math::TriangleI>> buckets(triangles.size());
+        const int n = triangles.size();
+        if (n <= 1) return;
 
+        std::vector<size_t> counts(n, 0);
+
+        // count how many times each vertex value appears
         for (const auto& triangle : triangles)
         {
-            buckets[triangle[vertexIndex]].push_back(triangle);
+            counts[triangle[vertexIndex]]++;
         }
 
-        // Clear the original vector and concatenate the buckets back into it
-        triangles.clear();
-        for (const auto& bucket : buckets)
+        // convert counts to prefix sums to determine the final index positions
+        for (size_t i = 1; i < n; ++i)
         {
-            triangles.insert(triangles.end(), bucket.begin(), bucket.end());
+            counts[i] += counts[i - 1];
         }
+
+        // build the sorted output array
+        std::vector<math::TriangleI> output(n);
+        for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+        {
+            size_t val = triangles[i][vertexIndex];
+            output[counts[val] - 1] = triangles[i];
+            counts[val]--;
+        }
+
+        triangles = std::move(output);
     }
 
     void sortTriangles(std::vector<math::TriangleI>& triangles)

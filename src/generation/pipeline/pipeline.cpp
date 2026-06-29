@@ -6,8 +6,6 @@
 
 #include "core/config.hpp"
 
-#include "core/debug.hpp"
-
 namespace generation
 {
     void GenerationPipeline::generate()
