@@ -19,9 +19,9 @@ namespace renderer
     {
         for (const auto& triangle : triangles)
         {
-            DrawTriangleLines(toRaylib(points[triangle.a]),
-                              toRaylib(points[triangle.b]),
-                              toRaylib(points[triangle.c]),
+            DrawTriangleLines(toRaylib(points[triangle[0]]),
+                              toRaylib(points[triangle[1]]),
+                              toRaylib(points[triangle[2]]),
                               GREEN);
         }
     }

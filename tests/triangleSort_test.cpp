@@ -16,9 +16,9 @@ std::vector<math::TriangleI> generateTriangleData(math::RngEngine& rng, size_t c
 
     for (size_t i = 0; i < count; ++i) {
         math::TriangleI triangle;
-        triangle.a = math::getRandomInt(rng, dist);
-        triangle.b = math::getRandomInt(rng, dist);
-        triangle.c = math::getRandomInt(rng, dist);
+        triangle[0] = math::getRandomInt(rng, dist);
+        triangle[1] = math::getRandomInt(rng, dist);
+        triangle[2] = math::getRandomInt(rng, dist);
 
         triangle.sort_indices();
         triangles.push_back(triangle);
