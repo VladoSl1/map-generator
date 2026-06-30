@@ -11,7 +11,6 @@ namespace generation::pipeline
         voronoiDiagram.vertices = findVoronoiVerticies(trianglePoints, triangleIndices);
 
         // assuming the triangle points are lexicographically sorted
-
         for (size_t i = 0; i < triangleIndices.size(); ++i)
         {
             const auto& triangleA = triangleIndices[i];
@@ -20,14 +19,13 @@ namespace generation::pipeline
             {
                 const auto& triangleB = triangleIndices[j];
 
-                if (triangleA[0] == triangleB[0] && triangleA[1] == triangleB[1])
+                if (shareEdge(triangleA, triangleB))
                 {
                     voronoiDiagram.edges.push_back(math::EdgeI{i, j});
 
                 }
                 else
                 {
-                    break;
                 }
             }
         }

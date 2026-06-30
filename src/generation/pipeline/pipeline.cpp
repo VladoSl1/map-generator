@@ -1,5 +1,6 @@
 #include "pipeline.hpp"
 
+#include "core/math/math.hpp"
 #include "core/utils/random.hpp"
 #include "generation/pipeline/delaunay_triangulation.hpp"
 #include "generation/pipeline/point_sampling.hpp"
@@ -8,6 +9,7 @@
 #include "core/config.hpp"
 
 #include "core/utils/debug.hpp"
+#include <ostream>
 
 namespace generation
 {
@@ -23,7 +25,7 @@ namespace generation
 
         triangles = pipeline::triangulate(points);
 
-        pipeline::sortTriangles(triangles);
+        math::sortPrimitives(triangles);
 
         voronoiDiagram = pipeline::generateVoronoi(points, triangles);
 
@@ -33,6 +35,14 @@ namespace generation
         for (const auto& edge : voronoiDiagram.edges)
         {
             std::cout << edge[0] << " -> " << edge[1] << std::endl;
+        }
+
+        std::cout << std::endl;
+
+        for (int i = 0; i < triangles.size(); ++i)
+        {
+            std::cout << i << ": " << triangles[i][0] << " " << triangles[i][1] << " " << triangles[i][2] << std::endl;
+
         }
     }
 }
