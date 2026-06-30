@@ -92,4 +92,22 @@ namespace math
             bucketSortPrimitives(primitives, vertexIndex);
         }
     }
+
+
+    template<size_t N>
+    std::array<EdgeI, N> convertToEdges(const math::IndexPrimitive<N>& primitive)
+    {
+        std::array<EdgeI, N> edges;
+
+        for (size_t i = 0; i < N; ++i)
+        {
+            size_t v1 = primitive[i];
+            size_t v2 = primitive[i + 1 == N ? 0 : i + 1];
+
+            edges[i] = EdgeI{{ std::min(v1, v2), std::max(v1, v2) }};
+        }
+
+        return edges;
+    }
+
 }

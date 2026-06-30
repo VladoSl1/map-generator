@@ -1,4 +1,5 @@
 #include "voronoi_diagram.hpp"
+#include "core/math/math.hpp"
 
 
 namespace generation::pipeline
@@ -10,28 +11,34 @@ namespace generation::pipeline
 
         voronoiDiagram.vertices = findVoronoiVerticies(trianglePoints, triangleIndices);
 
-        // assuming the triangle points are lexicographically sorted
+        std::vector<math::TriangleI> edgesWithId;
+        edgesWithId.reserve(triangleIndices.size() * 3);
+
         for (size_t i = 0; i < triangleIndices.size(); ++i)
         {
-            const auto& triangleA = triangleIndices[i];
+            auto triEdges = math::convertToEdges(triangleIndices[i]);
 
-            for (size_t j = i + 1; j < triangleIndices.size(); ++j)
+            for (int j = 0; j < triEdges.size(); ++j)
             {
-                const auto& triangleB = triangleIndices[j];
-
-                if (shareEdge(triangleA, triangleB))
-                {
-                    voronoiDiagram.edges.push_back(math::EdgeI{i, j});
-
-                }
-                else
-                {
-                }
+                edgesWithId.emplace_back(math::TriangleI{{ triEdges[j][0], triEdges[j][1], i }});
             }
         }
 
+        math::bucketSortPrimitives(edgesWithId, 1);
+        math::bucketSortPrimitives(edgesWithId, 0);
+
+        for (size_t i = 0; i < edgesWithId.size(); ++i)
+        {
+
+
+
+        }
+
+
         return voronoiDiagram;
     }
+
+
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
     std::vector<math::Point2Di> findVoronoiVerticies(std::vector<math::Point2Di> trianglePoints,

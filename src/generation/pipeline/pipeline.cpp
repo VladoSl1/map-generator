@@ -25,7 +25,7 @@ namespace generation
 
         triangles = pipeline::triangulate(points);
 
-        math::sortPrimitives(triangles);
+        // math::sortPrimitives(triangles);
 
         voronoiDiagram = pipeline::generateVoronoi(points, triangles);
 
