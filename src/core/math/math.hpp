@@ -54,7 +54,7 @@ namespace math
 
 
     template<size_t N>
-    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& triangles, size_t vertexIndex);
+    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& primitives, size_t vertexIndex);
 
     /* alg: https://en.wikipedia.org/wiki/Radix_sort */
     template<size_t N>

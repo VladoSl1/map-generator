@@ -44,17 +44,17 @@ namespace math
     }
 
     template<size_t N>
-    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& triangles, size_t vertexIndex)
+    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& primitives, size_t vertexIndex)
     {
-        const int n = triangles.size();
+        const int n = primitives.size();
         if (n <= 1) return;
 
         std::vector<size_t> counts(n, 0);
 
         // count how many times each vertex value appears
-        for (const auto& triangle : triangles)
+        for (const auto& primitive : primitives)
         {
-            counts[triangle[vertexIndex]]++;
+            counts[primitive[vertexIndex]]++;
         }
 
         // convert counts to prefix sums to determine the final index positions
@@ -67,12 +67,12 @@ namespace math
         std::vector<math::IndexPrimitive<N>> output(n);
         for (int i = static_cast<int>(n) - 1; i >= 0; --i)
         {
-            size_t val = triangles[i][vertexIndex];
-            output[counts[val] - 1] = triangles[i];
+            size_t val = primitives[i][vertexIndex];
+            output[counts[val] - 1] = primitives[i];
             counts[val]--;
         }
 
-        triangles = std::move(output);
+        primitives = std::move(output);
     }
 
     template<size_t N>
