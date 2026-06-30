@@ -8,7 +8,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     FetchContent_MakeAvailable(googletest)
 
     add_executable(unit_tests
-        pipeline_test.cpp
+        triangleSort_test.cpp
     )
     target_link_libraries(unit_tests
         PRIVATE
