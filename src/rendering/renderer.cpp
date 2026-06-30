@@ -6,23 +6,36 @@
 
 namespace renderer
 {
-    void renderPoints(const std::vector<math::Point2Di>& points)
+    void renderPoints(const std::vector<math::Point2Di>& points, Color color)
     {
         for (const auto& point : points)
         {
-            DrawCircle(point.x, point.y, config::renderer::POINT_RADIUS, RED);
+            DrawCircle(point.x, point.y, config::renderer::POINT_RADIUS, color);
         }
     }
 
     void renderTriangles(const std::vector<math::Point2Di>& points,
-                         const std::vector<math::TriangleI>& triangles)
+                         const std::vector<math::TriangleI>& triangles,
+                         Color color)
     {
         for (const auto& triangle : triangles)
         {
             DrawTriangleLines(toRaylib(points[triangle[0]]),
                               toRaylib(points[triangle[1]]),
                               toRaylib(points[triangle[2]]),
-                              GREEN);
+                              color);
+        }
+    }
+
+    void renderEdges(const std::vector<math::Point2Di>& points,
+                     const std::vector<math::EdgeI>& edges,
+                     Color color)
+    {
+        for (const auto& edge : edges)
+        {
+            DrawLineV(toRaylib(points[edge[0]]),
+                      toRaylib(points[edge[1]]),
+                      color);
         }
     }
 }

@@ -4,7 +4,10 @@ target_sources(map_gen_lib
     PRIVATE
         core/config.hpp
         core/utils/random.hpp
+        core/utils/debug.hpp
+
         core/math/math.hpp
+        core/math/math.cpp
 
         generation/pipeline/pipeline.hpp
         generation/pipeline/pipeline.cpp
@@ -14,6 +17,9 @@ target_sources(map_gen_lib
 
         generation/pipeline/delaunay_triangulation.hpp
         generation/pipeline/delaunay_triangulation.cpp
+
+        generation/pipeline/voronoi_diagram.hpp
+        generation/pipeline/voronoi_diagram.cpp
 
         rendering/renderer.hpp
         rendering/renderer.cpp

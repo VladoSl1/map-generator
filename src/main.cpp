@@ -30,8 +30,10 @@ int main()
         {
             ClearBackground(RAYWHITE);
 
-            renderer::renderPoints(pipeline.points);
+            renderer::renderPoints(pipeline.points, RED);
+            renderer::renderPoints(pipeline.voronoiVertices, BLUE);
             renderer::renderTriangles(pipeline.points, pipeline.triangles);
+            renderer::renderEdges(pipeline.voronoiDiagram.vertices, pipeline.voronoiDiagram.edges, PURPLE);
 
         }
         EndDrawing();

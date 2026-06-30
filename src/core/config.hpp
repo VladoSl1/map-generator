@@ -19,7 +19,7 @@ namespace config
 
     namespace renderer
     {
-        inline constexpr int POINT_RADIUS = 5;
+        inline constexpr int POINT_RADIUS = 4;
     }
 }
 

@@ -22,7 +22,7 @@ namespace generation::pipeline
         triangles.reserve(d.triangles.size() / 3);
         for (size_t i = 0; i < d.triangles.size(); i += 3)
         {
-            triangles.emplace_back(d.triangles[i], d.triangles[i + 1], d.triangles[i + 2]);
+            triangles.push_back(math::TriangleI{d.triangles[i], d.triangles[i + 1], d.triangles[i + 2]});
             triangles.back().sort_indices();
         }
 
@@ -60,6 +60,7 @@ namespace generation::pipeline
         triangles = std::move(output);
     }
 
+    /* alg: https://en.wikipedia.org/wiki/Radix_sort */
     void sortTriangles(std::vector<math::TriangleI>& triangles)
     {
         for (int vertexIndex = 2; vertexIndex >= 0; --vertexIndex)
