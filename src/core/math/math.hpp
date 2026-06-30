@@ -1,7 +1,8 @@
 #pragma once
 
-#include <iterator>
+#include <algorithm>
 #include <array>
+#include <vector>
 
 namespace math
 {
@@ -34,12 +35,12 @@ namespace math
 
         size_t operator[](size_t index) const
         {
-            return indices.at(index);
+            return indices[index];
         }
 
         size_t& operator[](size_t index)
         {
-            return indices.at(index);
+            return indices[index];
         }
     };
 
@@ -48,4 +49,14 @@ namespace math
 
     /* algorithm: https://en.wikipedia.org/wiki/Circumcircle#Circumcenter_coordinates */
     Point2Dd calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C);
+
+    bool shareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
+
+
+    template<size_t N>
+    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& triangles, size_t vertexIndex);
+
+    /* alg: https://en.wikipedia.org/wiki/Radix_sort */
+    template<size_t N>
+    void sortPrimitives(std::vector<math::IndexPrimitive<N>>& primitive);
 }
