@@ -4,8 +4,16 @@
 
 namespace generation::pipeline
 {
-    VoronoiDiagram generateVoronoi(std::vector<math::Point2Di> trianglePoints,
-                                   std::vector<math::TriangleI> triangleIndices)
+
+    /**
+     * First, calculate Voronoi vertices by calculating the circumcenters of each triangle.
+     * In Voronoi diagram, there is edge between two vertices, iff in Delaunay triangulation
+     * the two triangles coresponding to these verticies share an edge. Therefore, it makes
+     * sense to process the graph edge-wise. For efficiency, we use radix sort to process the
+     * edge in O(n) time.
+     * */
+    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& trianglePoints,
+                                   const std::vector<math::TriangleI>& triangleIndices)
     {
         VoronoiDiagram voronoiDiagram;
 
@@ -27,13 +35,24 @@ namespace generation::pipeline
         math::bucketSortPrimitives(edgesWithId, 1);
         math::bucketSortPrimitives(edgesWithId, 0);
 
-        for (size_t i = 0; i < edgesWithId.size(); ++i)
+
+        size_t i = 0;
+        while (i < edgesWithId.size())
         {
-
-
+            // since the initial graph is planar, only two triangles can share an edge
+            if (edgesWithId[i][0] == edgesWithId[i+1][0] && edgesWithId[i][1] == edgesWithId[i+1][1])
+            {
+                voronoiDiagram.edges.emplace_back(math::EdgeI{edgesWithId[i][2], edgesWithId[i+1][2]});
+                i += 2;
+            }
+            // the edge should go to infinity
+            else
+            {
+                // TODO: should we handle this case? maybe we can just ignore it for now
+                i += 1;
+            }
 
         }
-
 
         return voronoiDiagram;
     }
@@ -41,8 +60,8 @@ namespace generation::pipeline
 
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
-    std::vector<math::Point2Di> findVoronoiVerticies(std::vector<math::Point2Di> trianglePoints,
-                                                     std::vector<math::TriangleI> triangleIndices)
+    std::vector<math::Point2Di> findVoronoiVerticies(const std::vector<math::Point2Di>& trianglePoints,
+                                                     const std::vector<math::TriangleI>& triangleIndices)
     {
         std::vector<math::Point2Di> voronoiVertices;
 

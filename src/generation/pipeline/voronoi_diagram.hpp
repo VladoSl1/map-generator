@@ -14,11 +14,9 @@ namespace generation::pipeline
 
     };
 
-    std::vector<math::Point2Di> findVoronoiVerticies(std::vector<math::Point2Di> trianglePoints,
-                                                     std::vector<math::TriangleI> triangleIndices);
+    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& trianglePoints,
+                                   const std::vector<math::TriangleI>& triangleIndices);
 
-    VoronoiDiagram generateVoronoi(std::vector<math::Point2Di> trianglePoints,
-                                   std::vector<math::TriangleI> triangleIndices);
-
-
+    std::vector<math::Point2Di> findVoronoiVerticies(const std::vector<math::Point2Di>& trianglePoints,
+                                                     const std::vector<math::TriangleI>& triangleIndices);
 }
