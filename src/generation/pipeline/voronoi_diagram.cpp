@@ -1,9 +1,17 @@
 #include "voronoi_diagram.hpp"
 #include "core/math/math.hpp"
 
+#include <iostream>
+
+#include "core/utils/debug.hpp"
 
 namespace generation::pipeline
 {
+
+    void VoronoiDiagram::assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex)
+    {
+        polygons[polygonIndex].indices.push_back(edgeIndex);
+    }
 
     /**
      * First, calculate Voronoi vertices by calculating the circumcenters of each triangle.
@@ -11,38 +19,61 @@ namespace generation::pipeline
      * the two triangles coresponding to these verticies share an edge. Therefore, it makes
      * sense to process the graph edge-wise. For efficiency, we use radix sort to process the
      * edge in O(n) time.
+     * It is possible to directly calculate the Voronoi edges from points without Deulaunay
+     * triangles, but this approach is much more complicated.
      * */
-    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& trianglePoints,
+    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& triangleSeeds,
                                    const std::vector<math::TriangleI>& triangleIndices)
     {
         VoronoiDiagram voronoiDiagram;
+        voronoiDiagram.polygons.resize(triangleSeeds.size());
 
-        voronoiDiagram.vertices = findVoronoiVerticies(trianglePoints, triangleIndices);
+        voronoiDiagram.vertices = findVoronoiVerticies(triangleSeeds, triangleIndices);
 
-        std::vector<math::TriangleI> edgesWithId;
-        edgesWithId.reserve(triangleIndices.size() * 3);
+        /* 0 - idx of triangleSeed from which the edge starts
+         * 1 - idx of triangleSeed to which the edge goes
+         * 2 - the idx of triangle (= idx of voronoi vertex) to which the edge corresponds
+         * */
+        std::vector<math::TriangleI> triangleEdgesWithId;
+        triangleEdgesWithId.reserve(triangleIndices.size() * 3);
 
         for (size_t i = 0; i < triangleIndices.size(); ++i)
         {
+            // array of edges of the triangle, each edge is represented
+            // by two indices of triangleSeeds
             auto triEdges = math::convertToEdges(triangleIndices[i]);
 
             for (int j = 0; j < triEdges.size(); ++j)
             {
-                edgesWithId.emplace_back(math::TriangleI{{ triEdges[j][0], triEdges[j][1], i }});
+                triangleEdgesWithId.emplace_back(math::TriangleI{{ triEdges[j][0], triEdges[j][1], i }});
             }
         }
 
-        math::bucketSortPrimitives(edgesWithId, 1);
-        math::bucketSortPrimitives(edgesWithId, 0);
+
+        math::bucketSortPrimitives(triangleEdgesWithId, 1);
+        math::bucketSortPrimitives(triangleEdgesWithId, 0);
+
+        log("triangleEdgesWithId.size() = {}", triangleEdgesWithId.size());
+        log("voronoiDiagram.vertices.size() = {}", voronoiDiagram.vertices.size());
 
 
         size_t i = 0;
-        while (i < edgesWithId.size())
+        while (i < triangleEdgesWithId.size())
         {
-            // since the initial graph is planar, only two triangles can share an edge
-            if (edgesWithId[i][0] == edgesWithId[i+1][0] && edgesWithId[i][1] == edgesWithId[i+1][1])
+            log("{}", i);
+            if (i+1 < triangleEdgesWithId.size() &&
+                triangleEdgesWithId[i][0] == triangleEdgesWithId[i+1][0] &&
+                triangleEdgesWithId[i][1] == triangleEdgesWithId[i+1][1])
             {
-                voronoiDiagram.edges.emplace_back(math::EdgeI{edgesWithId[i][2], edgesWithId[i+1][2]});
+                // add edge between the two voronoi vertices corresponding to their respective triangles
+                voronoiDiagram.edges.emplace_back(
+                    math::EdgeI{triangleEdgesWithId[i][2], triangleEdgesWithId[i+1][2]}
+                );
+
+                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i][0]);
+                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i][1]);
+
+                // since the initial graph is planar, only two triangles can share an edge
                 i += 2;
             }
             // the edge should go to infinity

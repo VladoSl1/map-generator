@@ -23,29 +23,34 @@ namespace math
     using Point2Df = Point2D<float>;
     using Point2Dd = Point2D<double>;
 
-    template <size_t N>
-    struct IndexPrimitive
+
+    template <typename Container>
+    struct IndexContainer
     {
-        std::array<size_t, N> indices;
+        /* kept public so that it is aggregate initializable,
+         * there are no invariants to maintain,
+         * making it private would require a lot of boilerplate.
+         * */
+        Container indices;
 
-        void sort_indices()
+        constexpr void sort_indices()
         {
-            std::sort(indices.begin(), indices.end());
+            std::ranges::sort(indices);
         }
 
-        size_t operator[](size_t index) const
-        {
-            return indices[index];
-        }
-
-        size_t& operator[](size_t index)
-        {
-            return indices[index];
-        }
+        constexpr auto size() const { return indices.size(); }
+        constexpr decltype(auto) operator[](size_t index) const { return indices[index]; }
+        constexpr decltype(auto) operator[](size_t index)       { return indices[index]; }
     };
+
+    template <size_t N>
+    using IndexPrimitive = IndexContainer<std::array<size_t, N>>;
 
     using EdgeI     = IndexPrimitive<2>;
     using TriangleI = IndexPrimitive<3>;
+
+    using PolygonI = IndexContainer<std::vector<size_t>>;
+
 
     /* algorithm: https://en.wikipedia.org/wiki/Circumcircle#Circumcenter_coordinates */
     Point2Dd calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C);
@@ -109,5 +114,4 @@ namespace math
 
         return edges;
     }
-
 }

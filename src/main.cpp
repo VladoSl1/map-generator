@@ -35,7 +35,21 @@ int main()
             // renderer::renderTriangles(pipeline.points, pipeline.triangles);
             renderer::renderEdges(pipeline.voronoiDiagram.vertices, pipeline.voronoiDiagram.edges, PURPLE);
 
-        }
+            if (pipeline.points.size() > 10)
+            {
+                renderer::renderPoints({
+                    pipeline.points[10]}, GREEN);
+
+                std::vector<math::EdgeI> highlightedEdges;
+                for (size_t edgeIdx : pipeline.voronoiDiagram.polygons[10].indices)
+                {
+                    highlightedEdges.push_back(pipeline.voronoiDiagram.edges[edgeIdx]);
+                }
+
+                // Pass the extracted edges to the existing renderer function
+                renderer::renderEdges(pipeline.voronoiDiagram.vertices, highlightedEdges, ORANGE);
+            }
+            }
         EndDrawing();
     }
 

@@ -11,6 +11,9 @@ namespace generation::pipeline
     {
         std::vector<math::Point2Di> vertices;
         std::vector<math::EdgeI> edges;
+        std::vector<math::PolygonI> polygons;
+
+        void assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex);
 
     };
 

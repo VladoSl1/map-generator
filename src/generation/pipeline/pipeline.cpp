@@ -9,7 +9,7 @@
 #include "core/config.hpp"
 
 #include "core/utils/debug.hpp"
-#include <ostream>
+
 
 namespace generation
 {
@@ -43,18 +43,18 @@ namespace generation
 
         voronoiVertices = voronoiDiagram.vertices;
 
-        std::cout << voronoiDiagram.vertices.size() << " voronoi vertices generated" << std::endl;
-        for (const auto& edge : voronoiDiagram.edges)
-        {
-            std::cout << edge[0] << " -> " << edge[1] << std::endl;
-        }
-
-        std::cout << std::endl;
-
-        for (int i = 0; i < triangles.size(); ++i)
-        {
-            std::cout << i << ": " << triangles[i][0] << " " << triangles[i][1] << " " << triangles[i][2] << std::endl;
-
-        }
+        // std::cout << voronoiDiagram.vertices.size() << " voronoi vertices generated" << std::endl;
+        // for (const auto& edge : voronoiDiagram.edges)
+        // {
+        //     std::cout << edge[0] << " -> " << edge[1] << std::endl;
+        // }
+        //
+        // std::cout << std::endl;
+        //
+        // for (int i = 0; i < triangles.size(); ++i)
+        // {
+        //     std::cout << i << ": " << triangles[i][0] << " " << triangles[i][1] << " " << triangles[i][2] << std::endl;
+        //
+        // }
     }
 }

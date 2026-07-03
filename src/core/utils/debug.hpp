@@ -7,15 +7,10 @@
 
 #define DEBUG_FLAG true;
 
-
-void debug_log(const std::string_view message,
-               const std::source_location location = std::source_location::current()) {
+template <typename... Args>
+void log(std::format_string<Args...> fmt, Args&&... args) {
 #ifdef DEBUG_FLAG
-    std::clog << "file: "
-              << location.file_name() << '('
-              << location.line() << ':'
-              << location.column() << ") `"
-              << location.function_name() << "`: "
-              << message << '\n';
+    std::cout << "[DEBUG]";
+    std::cout << std::format(fmt, std::forward<Args>(args)...) << std::endl;
 #endif
 }
