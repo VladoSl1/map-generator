@@ -13,7 +13,7 @@ namespace config
 
     namespace generation
     {
-        inline constexpr int NUM_POINTS = 500;
+        inline constexpr int NUM_POINTS = 100;
         inline constexpr int INSIDE_PADDING = 15;
     }
 

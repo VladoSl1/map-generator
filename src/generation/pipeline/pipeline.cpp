@@ -23,6 +23,18 @@ namespace generation
 
         points = pipeline::samplePoints(rngEngine, widthInterval, heightInterval, config::generation::NUM_POINTS);
 
+        // add boundary points for debugging purposes
+        for (int i = 0; i < m_width; i += 100)
+        {
+            points.emplace_back(math::Point2Di{i, 0});
+            points.emplace_back(math::Point2Di{i, m_height});
+        }
+        for (int i = 0; i < m_height; i += 100)
+        {
+            points.emplace_back(math::Point2Di{0, i});
+            points.emplace_back(math::Point2Di{m_width, i});
+        }
+
         triangles = pipeline::triangulate(points);
 
         // math::sortPrimitives(triangles);

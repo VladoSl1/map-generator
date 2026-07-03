@@ -19,4 +19,6 @@ namespace generation::pipeline
 
     std::vector<math::Point2Di> findVoronoiVerticies(const std::vector<math::Point2Di>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices);
+
+
 }
