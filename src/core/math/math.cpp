@@ -1,12 +1,13 @@
 #include "math.hpp"
 
+#include "core/config.hpp"
 
 namespace math
 {
     Point2Dd calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C)
     {
         double D = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
-        if (D == 0)
+        if (abs(D) < config::math::EPSILON)
         {
             throw std::runtime_error("Points are collinear; circumcenter is undefined.");
          }

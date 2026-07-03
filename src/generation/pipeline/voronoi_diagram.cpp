@@ -49,13 +49,8 @@ namespace generation::pipeline
             }
         }
 
-
-        math::bucketSortPrimitives(triangleEdgesWithId, 1);
-        math::bucketSortPrimitives(triangleEdgesWithId, 0);
-
-        log("triangleEdgesWithId.size() = {}", triangleEdgesWithId.size());
-        log("voronoiDiagram.vertices.size() = {}", voronoiDiagram.vertices.size());
-
+        math::countingSortPrimitives(triangleEdgesWithId, 1);
+        math::countingSortPrimitives(triangleEdgesWithId, 0);
 
         size_t i = 0;
         while (i < triangleEdgesWithId.size())

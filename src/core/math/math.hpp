@@ -13,8 +13,27 @@ namespace math
         T y;
 
         template<typename U>
-        Point2D<U> cast() const {
-            return { static_cast<U>(x), static_cast<U>(y) };
+        Point2D<U> cast() const
+        {
+            // apply special rounding and clamping when casting from float/double to int/size_t
+            if constexpr (std::is_floating_point_v<T> && std::is_integral_v<U>)
+            {
+                T rounded_x = std::round(x);
+                T rounded_y = std::round(y);
+
+                constexpr T min_limit = static_cast<T>(std::numeric_limits<U>::min());
+                constexpr T max_limit = static_cast<T>(std::numeric_limits<U>::max());
+
+                rounded_x = std::clamp(rounded_x, min_limit, max_limit);
+                rounded_y = std::clamp(rounded_y, min_limit, max_limit);
+
+                return { static_cast<U>(rounded_x), static_cast<U>(rounded_y) };
+            }
+            else
+            {
+                // default fallback for safe casts (e.g., int -> float, float -> double)
+                return { static_cast<U>(x), static_cast<U>(y) };
+            }
         }
     };
 
@@ -58,8 +77,10 @@ namespace math
     bool shareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
     template<size_t N>
-    void bucketSortPrimitives(std::vector<math::IndexPrimitive<N>>& primitives, size_t vertexIndex)
+    void countingSortPrimitives(std::vector<IndexPrimitive<N>>& primitives, size_t vertexIndex)
     {
+        // TODO: consider maybe for better performance adding buffering to avoid multiple allocations
+
         const int n = primitives.size();
         if (n <= 1) return;
 
@@ -78,7 +99,7 @@ namespace math
         }
 
         // build the sorted output array
-        std::vector<math::IndexPrimitive<N>> output(n);
+        std::vector<IndexPrimitive<N>> output(n);
         for (int i = static_cast<int>(n) - 1; i >= 0; --i)
         {
             size_t val = primitives[i][vertexIndex];
@@ -90,7 +111,7 @@ namespace math
     }
 
     template<size_t N>
-    void sortPrimitives(std::vector<math::IndexPrimitive<N>>& primitives)
+    void sortPrimitives(std::vector<IndexPrimitive<N>>& primitives)
     {
         for (int vertexIndex = N-1; vertexIndex >= 0; --vertexIndex)
         {
@@ -100,7 +121,7 @@ namespace math
 
 
     template<size_t N>
-    std::array<EdgeI, N> convertToEdges(const math::IndexPrimitive<N>& primitive)
+    std::array<EdgeI, N> convertToEdges(const IndexPrimitive<N>& primitive)
     {
         std::array<EdgeI, N> edges;
 

@@ -21,5 +21,10 @@ namespace config
     {
         inline constexpr int POINT_RADIUS = 4;
     }
+
+    namespace math
+    {
+        inline constexpr double EPSILON = 1e-9;
+    }
 }
 
