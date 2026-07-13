@@ -6,8 +6,15 @@ target_sources(map_gen_lib
         core/utils/random.hpp
         core/utils/debug.hpp
 
-        core/math/math.hpp
-        core/math/math.cpp
+        core/math/geometry.hpp
+        core/math/geometry.cpp
+
+        core/math/point2d.hpp
+
+        core/math/sorting.hpp
+
+        core/math/topology.hpp
+        core/math/topology.cpp
 
         generation/pipeline/pipeline.hpp
         generation/pipeline/pipeline.cpp

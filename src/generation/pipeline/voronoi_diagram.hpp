@@ -2,7 +2,8 @@
 
 #include <vector>
 
-#include "core/math/math.hpp"
+#include "core/math/point2d.hpp"
+#include "core/math/topology.hpp"
 
 
 namespace generation::pipeline
@@ -25,4 +26,6 @@ namespace generation::pipeline
 
     std::vector<math::Point2Di> findVoronoiVertices(const std::vector<math::Point2Di>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices);
+
+    void relaxVoronoiDiagram(VoronoiDiagram& voronoiDiagram);
 }

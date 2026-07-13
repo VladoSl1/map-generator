@@ -1,6 +1,5 @@
 #include "pipeline.hpp"
 
-#include "core/math/math.hpp"
 #include "core/utils/random.hpp"
 #include "generation/pipeline/delaunay_triangulation.hpp"
 #include "generation/pipeline/point_sampling.hpp"

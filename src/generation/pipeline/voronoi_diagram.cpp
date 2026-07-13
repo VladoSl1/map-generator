@@ -1,5 +1,7 @@
 #include "voronoi_diagram.hpp"
-#include "core/math/math.hpp"
+
+#include "core/math/geometry.hpp"
+#include "core/math/sorting.hpp"
 
 #include <iostream>
 
@@ -119,5 +121,30 @@ namespace generation::pipeline
         return voronoiVertices;
     }
 
+    void relaxVoronoiDiagram(VoronoiDiagram& voronoiDiagram)
+    {
+        std::vector<math::Point2Di> newSeeds(voronoiDiagram.seeds.size());
 
+
+        // TODO: ignore polygons that are not closed (i.e. have edges that go to infinity)
+        for (size_t i = 0; i < voronoiDiagram.polygons.size(); ++i)
+        {
+            const auto& polygon = voronoiDiagram.polygons[i];
+            math::Point2Dd centroid{0, 0};
+
+            for (const auto& edgeIndex : polygon.indices)
+            {
+                const auto& edge = voronoiDiagram.edges[edgeIndex];
+                const auto& vertex1 = voronoiDiagram.vertices[edge[0]];
+                const auto& vertex2 = voronoiDiagram.vertices[edge[1]];
+
+                centroid += vertex1.cast<double>();
+                centroid += vertex2.cast<double>();
+            }
+
+            centroid /= static_cast<double>(polygon.indices.size() * 2);
+            newSeeds[i] = centroid.cast<int>();
+        }
+
+    }
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/math/math.hpp"
-
 #include "generation/pipeline/voronoi_diagram.hpp"
 
 #include <vector>

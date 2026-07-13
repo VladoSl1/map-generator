@@ -2,7 +2,7 @@
 
 #include <raylib.h>
 
-#include "core/math/math.hpp"
+#include "core/math/point2d.hpp"
 
 namespace renderer
 {

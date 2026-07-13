@@ -1,5 +1,4 @@
 #include "delaunay_triangulation.hpp"
-#include "core/math/math.hpp"
 
 #include <delaunator.hpp>
 

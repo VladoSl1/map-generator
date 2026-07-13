@@ -1,9 +1,10 @@
 #pragma once
 
-
-#include "core/math/math.hpp"
-
 #include <vector>
+
+#include "core/math/point2d.hpp"
+#include "core/math/topology.hpp"
+
 
 namespace generation::pipeline
 {

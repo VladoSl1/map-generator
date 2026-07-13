@@ -1,6 +1,7 @@
 #include <raylib.h>
 
-#include "core/math/math.hpp"
+#include "core/math/point2d.hpp"
+#include "core/math/topology.hpp"
 
 #include <vector>
 
