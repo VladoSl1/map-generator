@@ -13,6 +13,14 @@ namespace generation::pipeline
         polygons[polygonIndex].indices.push_back(edgeIndex);
     }
 
+    void VoronoiDiagram::clear()
+    {
+        seeds.clear();
+        vertices.clear();
+        edges.clear();
+        polygons.clear();
+    }
+
 
     struct EdgeWithOwner
     {
@@ -24,19 +32,21 @@ namespace generation::pipeline
     /**
      * First, calculate Voronoi vertices by calculating the circumcenters of each triangle.
      * In Voronoi diagram, there is edge between two vertices, iff in Delaunay triangulation
-     * the two triangles coresponding to these verticies share an edge. Therefore, it makes
+     * the two triangles corresponding to these verticies share an edge. Therefore, it makes
      * sense to process the graph edge-wise. For efficiency, we use radix sort to process the
      * edge in O(n) time.
-     * It is possible to directly calculate the Voronoi edges from points without Deulaunay
+     * It is possible to directly calculate the Voronoi edges from points without Delaunay
      * triangles, but this approach is much more complicated.
      * */
-    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& triangleSeeds,
-                                   const std::vector<math::TriangleI>& triangleIndices)
+    void VoronoiDiagram::generate(const std::vector<math::Point2Di>& triangleSeeds,
+                                  const std::vector<math::TriangleI>& triangleIndices)
     {
-        VoronoiDiagram voronoiDiagram;
-        voronoiDiagram.polygons.resize(triangleSeeds.size());
+        clear();
+        polygons.resize(triangleSeeds.size());
 
-        voronoiDiagram.vertices = findVoronoiVerticies(triangleSeeds, triangleIndices);
+        seeds = triangleSeeds; // TODO: consider move semantics
+
+        vertices = findVoronoiVertices(triangleSeeds, triangleIndices);
 
         /* 0 - idx of triangleSeed from which the edge starts
          * 1 - idx of triangleSeed to which the edge goes
@@ -51,7 +61,7 @@ namespace generation::pipeline
             // by two indices of triangleSeeds
             auto triEdges = math::convertToEdges(triangleIndices[i]);
 
-            for (int j = 0; j < triEdges.size(); ++j)
+            for (size_t j = 0; j < triEdges.size(); ++j)
             {
                 triangleEdgesWithId.push_back({ triEdges[j], i });
             }
@@ -68,12 +78,12 @@ namespace generation::pipeline
                 triangleEdgesWithId[i].edge.indices == triangleEdgesWithId[i+1].edge.indices)
             {
                 // add edge between the two voronoi vertices corresponding to their respective triangles
-                voronoiDiagram.edges.push_back(
+                edges.push_back(
                     math::EdgeI{triangleEdgesWithId[i].triangleId, triangleEdgesWithId[i+1].triangleId}
                 );
 
-                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i].edge[0]);
-                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i].edge[1]);
+                assignEdgeToPolygon(edges.size() - 1, triangleEdgesWithId[i].edge[0]);
+                assignEdgeToPolygon(edges.size() - 1, triangleEdgesWithId[i].edge[1]);
 
                 // since the initial graph is planar, only two triangles can share an edge
                 i += 2;
@@ -86,14 +96,12 @@ namespace generation::pipeline
             }
 
         }
-
-        return voronoiDiagram;
     }
 
 
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
-    std::vector<math::Point2Di> findVoronoiVerticies(const std::vector<math::Point2Di>& trianglePoints,
+    std::vector<math::Point2Di> findVoronoiVertices(const std::vector<math::Point2Di>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices)
     {
         std::vector<math::Point2Di> voronoiVertices;

@@ -39,7 +39,7 @@ namespace generation
 
         // math::sortPrimitives(triangles);
 
-        voronoiDiagram = pipeline::generateVoronoi(points, triangles);
+        voronoiDiagram.generate(points, triangles);
 
         voronoiVertices = voronoiDiagram.vertices;
 

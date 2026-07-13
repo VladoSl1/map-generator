@@ -9,19 +9,20 @@ namespace generation::pipeline
 {
     struct VoronoiDiagram
     {
+        std::vector<math::Point2Di> seeds;
         std::vector<math::Point2Di> vertices;
         std::vector<math::EdgeI> edges;
         std::vector<math::PolygonI> polygons;
 
         void assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex);
 
+        void generate(const std::vector<math::Point2Di>& trianglePoints,
+                      const std::vector<math::TriangleI>& triangleIndices);
+
+        void clear();
     };
 
-    VoronoiDiagram generateVoronoi(const std::vector<math::Point2Di>& trianglePoints,
-                                   const std::vector<math::TriangleI>& triangleIndices);
 
-    std::vector<math::Point2Di> findVoronoiVerticies(const std::vector<math::Point2Di>& trianglePoints,
+    std::vector<math::Point2Di> findVoronoiVertices(const std::vector<math::Point2Di>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices);
-
-
 }
