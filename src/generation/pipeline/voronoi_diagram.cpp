@@ -13,6 +13,14 @@ namespace generation::pipeline
         polygons[polygonIndex].indices.push_back(edgeIndex);
     }
 
+
+    struct EdgeWithOwner
+    {
+        math::EdgeI edge;
+        size_t triangleId;
+    };
+
+
     /**
      * First, calculate Voronoi vertices by calculating the circumcenters of each triangle.
      * In Voronoi diagram, there is edge between two vertices, iff in Delaunay triangulation
@@ -34,7 +42,7 @@ namespace generation::pipeline
          * 1 - idx of triangleSeed to which the edge goes
          * 2 - the idx of triangle (= idx of voronoi vertex) to which the edge corresponds
          * */
-        std::vector<math::TriangleI> triangleEdgesWithId;
+        std::vector<EdgeWithOwner> triangleEdgesWithId;
         triangleEdgesWithId.reserve(triangleIndices.size() * 3);
 
         for (size_t i = 0; i < triangleIndices.size(); ++i)
@@ -45,28 +53,27 @@ namespace generation::pipeline
 
             for (int j = 0; j < triEdges.size(); ++j)
             {
-                triangleEdgesWithId.emplace_back(math::TriangleI{{ triEdges[j][0], triEdges[j][1], i }});
+                triangleEdgesWithId.push_back({ triEdges[j], i });
             }
         }
 
-        math::countingSortPrimitives(triangleEdgesWithId, 1);
-        math::countingSortPrimitives(triangleEdgesWithId, 0);
+        math::countingSort(triangleEdgesWithId, [](const EdgeWithOwner& e) { return e.edge[1]; });
+        math::countingSort(triangleEdgesWithId, [](const EdgeWithOwner& e) { return e.edge[0]; });
 
         size_t i = 0;
         while (i < triangleEdgesWithId.size())
         {
             log("{}", i);
             if (i+1 < triangleEdgesWithId.size() &&
-                triangleEdgesWithId[i][0] == triangleEdgesWithId[i+1][0] &&
-                triangleEdgesWithId[i][1] == triangleEdgesWithId[i+1][1])
+                triangleEdgesWithId[i].edge.indices == triangleEdgesWithId[i+1].edge.indices)
             {
                 // add edge between the two voronoi vertices corresponding to their respective triangles
-                voronoiDiagram.edges.emplace_back(
-                    math::EdgeI{triangleEdgesWithId[i][2], triangleEdgesWithId[i+1][2]}
+                voronoiDiagram.edges.push_back(
+                    math::EdgeI{triangleEdgesWithId[i].triangleId, triangleEdgesWithId[i+1].triangleId}
                 );
 
-                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i][0]);
-                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i][1]);
+                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i].edge[0]);
+                voronoiDiagram.assignEdgeToPolygon(voronoiDiagram.edges.size() - 1, triangleEdgesWithId[i].edge[1]);
 
                 // since the initial graph is planar, only two triangles can share an edge
                 i += 2;
@@ -90,6 +97,7 @@ namespace generation::pipeline
                                                      const std::vector<math::TriangleI>& triangleIndices)
     {
         std::vector<math::Point2Di> voronoiVertices;
+        voronoiVertices.reserve(triangleIndices.size());
 
         for (const auto& triangle : triangleIndices)
         {

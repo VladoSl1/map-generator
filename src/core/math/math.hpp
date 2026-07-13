@@ -76,20 +76,23 @@ namespace math
 
     bool shareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
-    template<size_t N>
-    void countingSortPrimitives(std::vector<IndexPrimitive<N>>& primitives, size_t vertexIndex)
+
+
+    template<typename T, typename Proj>
+    void countingSort(std::vector<T>& elements, Proj proj)
     {
         // TODO: consider maybe for better performance adding buffering to avoid multiple allocations
+        // TODO: is this function maybe to abstract?
 
-        const int n = primitives.size();
+        const int n = elements.size();
         if (n <= 1) return;
 
         std::vector<size_t> counts(n, 0);
 
-        // count how many times each vertex value appears
-        for (const auto& primitive : primitives)
+        // count how many times each mapped value appears
+        for (const auto& element : elements)
         {
-            counts[primitive[vertexIndex]]++;
+            counts[proj(element)]++;
         }
 
         // convert counts to prefix sums to determine the final index positions
@@ -99,15 +102,21 @@ namespace math
         }
 
         // build the sorted output array
-        std::vector<IndexPrimitive<N>> output(n);
+        std::vector<T> output(n);
         for (int i = static_cast<int>(n) - 1; i >= 0; --i)
         {
-            size_t val = primitives[i][vertexIndex];
-            output[counts[val] - 1] = primitives[i];
+            size_t val = proj(elements[i]);
+            output[counts[val] - 1] = std::move(elements[i]); // Optimization: move instead of copy
             counts[val]--;
         }
 
-        primitives = std::move(output);
+        elements = std::move(output);
+    }
+
+    template<size_t N>
+    void countingSortPrimitives(std::vector<IndexPrimitive<N>>& primitives, size_t vertexIndex)
+    {
+        countingSort(primitives, [vertexIndex](const IndexPrimitive<N>& p) { return p[vertexIndex]; });
     }
 
     template<size_t N>
@@ -115,7 +124,7 @@ namespace math
     {
         for (int vertexIndex = N-1; vertexIndex >= 0; --vertexIndex)
         {
-            bucketSortPrimitives(primitives, vertexIndex);
+            countingSortPrimitives(primitives, vertexIndex);
         }
     }
 
