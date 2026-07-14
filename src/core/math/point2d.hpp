@@ -11,6 +11,7 @@ namespace math
         T x;
         T y;
 
+        // uses rounding when casting from float/double to integer types
         template<typename U>
         Point2D<U> cast() const
         {

@@ -3,7 +3,7 @@
 
 namespace math
 {
-    bool shareEdge(const TriangleI& triangleA, const TriangleI& triangleB)
+    bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB)
     {
         std::array<size_t, 3> shared_buffer;
 

@@ -20,40 +20,41 @@ namespace generation
         math::UnifIntDistribution widthInterval(config::generation::INSIDE_PADDING,
                                                 m_width - config::generation::INSIDE_PADDING);
 
-        points = pipeline::samplePoints(rngEngine, widthInterval, heightInterval, config::generation::NUM_POINTS);
+        seeds = pipeline::samplePoints(rngEngine, widthInterval, heightInterval, config::generation::NUM_POINTS);
 
         // add boundary points for debugging purposes
         for (int i = 0; i < m_width; i += 100)
         {
-            points.emplace_back(math::Point2Di{i, 0});
-            points.emplace_back(math::Point2Di{i, m_height});
+            seeds.emplace_back(math::Point2Di{i, 0}.cast<double>());
+            seeds.emplace_back(math::Point2Di{i, m_height}.cast<double>());
         }
         for (int i = 0; i < m_height; i += 100)
         {
-            points.emplace_back(math::Point2Di{0, i});
-            points.emplace_back(math::Point2Di{m_width, i});
+            seeds.emplace_back(math::Point2Di{0, i}.cast<double>());
+            seeds.emplace_back(math::Point2Di{m_width, i}.cast<double>());
         }
 
-        triangles = pipeline::triangulate(points);
+        generateFromPoints(std::move(seeds));
+    }
 
-        // math::sortPrimitives(triangles);
+    void GenerationPipeline::generateFromPoints(std::vector<math::Point2Dd> points)
+    {
+        log("pipeline generating");
+        seeds = std::move(points);
 
-        voronoiDiagram.generate(points, triangles);
+        log("seeds moved");
+
+        triangles = pipeline::triangulate(seeds);
+
+        log("triangulation generated");
+
+        voronoiDiagram.generate(seeds, triangles);
+
+        log("voronoi diagram generated");
 
         voronoiVertices = voronoiDiagram.vertices;
 
-        // std::cout << voronoiDiagram.vertices.size() << " voronoi vertices generated" << std::endl;
-        // for (const auto& edge : voronoiDiagram.edges)
-        // {
-        //     std::cout << edge[0] << " -> " << edge[1] << std::endl;
-        // }
-        //
-        // std::cout << std::endl;
-        //
-        // for (int i = 0; i < triangles.size(); ++i)
-        // {
-        //     std::cout << i << ": " << triangles[i][0] << " " << triangles[i][1] << " " << triangles[i][2] << std::endl;
-        //
-        // }
+        log("pipeline generated");
+
     }
 }

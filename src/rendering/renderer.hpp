@@ -8,11 +8,11 @@
 
 namespace renderer
 {
-    void renderPoints(const std::vector<math::Point2Di>& points, Color color);
-    void renderTriangles(const std::vector<math::Point2Di>& points,
+    void renderPoints(const std::vector<math::Point2Dd>& points, Color color);
+    void renderTriangles(const std::vector<math::Point2Dd>& points,
                          const std::vector<math::TriangleI>& triangles,
                          Color color = GREEN);
-    void renderEdges(const std::vector<math::Point2Di>& points,
+    void renderEdges(const std::vector<math::Point2Dd>& points,
                      const std::vector<math::EdgeI>& edges,
                      Color color);
 }

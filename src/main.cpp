@@ -16,29 +16,34 @@ int main()
                                             config::window::WINDOW_HEIGHT,
                                             42);
 
+    pipeline.generate();
+
+
     while (!WindowShouldClose())
     {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            pipeline = generation::GenerationPipeline(config::window::WINDOW_WIDTH,
-                                                      config::window::WINDOW_HEIGHT,
-                                                      GetRandomValue(0, 2147483647));
-            pipeline.generate();
+            // pipeline = generation::GenerationPipeline(config::window::WINDOW_WIDTH,
+            //                                           config::window::WINDOW_HEIGHT,
+            //                                           GetRandomValue(0, 2147483647));
+            // pipeline.generate();
+            auto newPoints = generation::pipeline::relaxVoronoiDiagram(pipeline.voronoiDiagram);
+            pipeline.generateFromPoints(newPoints);
         }
 
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
 
-            renderer::renderPoints(pipeline.points, RED);
+            renderer::renderPoints(pipeline.voronoiDiagram.seeds, RED);
             renderer::renderPoints(pipeline.voronoiVertices, BLUE);
             // renderer::renderTriangles(pipeline.points, pipeline.triangles);
             renderer::renderEdges(pipeline.voronoiDiagram.vertices, pipeline.voronoiDiagram.edges, PURPLE);
 
-            if (pipeline.points.size() > 10)
+            if (pipeline.voronoiDiagram.seeds.size() > 10)
             {
                 renderer::renderPoints({
-                    pipeline.points[10]}, GREEN);
+                    pipeline.voronoiDiagram.seeds[10]}, GREEN);
 
                 std::vector<math::EdgeI> highlightedEdges;
                 for (size_t edgeIdx : pipeline.voronoiDiagram.polygons[10].indices)

@@ -33,7 +33,7 @@ namespace math
     using PolygonI = IndexContainer<std::vector<size_t>>;
 
 
-    bool shareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
+    bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
     template<size_t N>
     std::array<EdgeI, N> convertToEdges(const IndexPrimitive<N>& primitive)

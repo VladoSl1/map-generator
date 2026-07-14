@@ -6,11 +6,11 @@
 
 namespace generation::pipeline
 {
-     std::vector<math::Point2Di> samplePoints(math::RngEngine rngEngine,
+     std::vector<math::Point2Dd> samplePoints(math::RngEngine rngEngine,
                                               math::UnifIntDistribution& widthInterval,
                                               math::UnifIntDistribution& heightInterval, int numPoints)
     {
-        std::vector<math::Point2Di> points;
+        std::vector<math::Point2Dd> points;
         points.reserve(numPoints);
 
         for (int i = 0; i < numPoints; ++i)

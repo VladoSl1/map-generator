@@ -8,6 +8,6 @@
 
 namespace generation::pipeline
 {
-    std::vector<math::TriangleI> triangulate(const std::vector<math::Point2Di>& points);
+    std::vector<math::TriangleI> triangulate(const std::vector<math::Point2Dd>& points);
 }
 
