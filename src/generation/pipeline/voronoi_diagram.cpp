@@ -47,27 +47,9 @@ namespace generation::pipeline
         clear();
         polygons.resize(triangleSeeds.size());
 
-        seeds = std::move(triangleSeeds); // TODO: consider move semantics
+        seeds = triangleSeeds; // TODO: consider move semantics
 
         vertices = findVoronoiVertices(seeds, triangleIndices);
-
-        // TODO: removing is for debugging purposes, remove later
-        // remove vertices that are outside the bounding box
-        // {
-        //     int i = 0;
-        //     while (i < vertices.size())
-        //     {
-        //         if (vertices[i].x < 0 || vertices[i].x > config::window::WINDOW_WIDTH|| vertices[i].y < 0 || vertices[i].y > config::window::WINDOW_HEIGHT)
-        //         {
-        //             vertices.erase(vertices.begin() + i);
-        //         }
-        //         else
-        //         {
-        //             i++;
-        //         }
-        //     }
-        // }
-
 
         std::vector<EdgeWithOwner> triangleEdgesWithId;
         triangleEdgesWithId.reserve(triangleIndices.size() * 3);
@@ -144,6 +126,7 @@ namespace generation::pipeline
         for (const auto& triangle : triangleIndices)
         {
             auto [a, b, c] = triangle.indices;
+            // TODO:: handle exception -- colinear points
             math::Point2Dd circumcenter = math::calculateCircumcenter(trianglePoints[a],
                                                                       trianglePoints[b],
                                                                       trianglePoints[c]);

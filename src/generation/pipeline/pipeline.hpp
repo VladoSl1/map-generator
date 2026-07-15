@@ -4,26 +4,8 @@
 
 #include <vector>
 
-namespace generation
+namespace generation::pipeline
 {
-    class GenerationPipeline
-    {
-    public:
-
-        std::vector<math::Point2Dd> seeds;
-        std::vector<math::TriangleI> triangles;
-        std::vector<math::Point2Dd> voronoiVertices;
-
-        pipeline::VoronoiDiagram voronoiDiagram;
-
-        GenerationPipeline(int width, int height, int worldSeed)
-            : m_width(width), m_height(height), m_worldSeed(worldSeed) {}
-
-        void generate();
-        void generateFromPoints(std::vector<math::Point2Dd> points);
-
-
-    private:
-        int m_width, m_height, m_worldSeed;
-    };
+    VoronoiDiagram generate(uint64_t seed, int width, int height);
+    VoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> points);
 }
