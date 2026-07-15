@@ -1,8 +1,14 @@
 #include "raylib.h"
+
 #include "core/config.hpp"
 
 #include "generation/pipeline/pipeline.hpp"
+#include "generation/pipeline/voronoi_diagram.hpp"
+
 #include "rendering/renderer.hpp"
+
+#include <vector>
+
 
 int main()
 {
@@ -12,49 +18,48 @@ int main()
     );
     SetTargetFPS(config::window::FPS);
 
-    generation::GenerationPipeline pipeline(config::window::WINDOW_WIDTH,
-                                            config::window::WINDOW_HEIGHT,
-                                            42);
-
-    pipeline.generate();
-
+    generation::pipeline::VoronoiDiagram voronoiDiagram = generation::pipeline::generate(
+        42,
+        config::window::WINDOW_WIDTH,
+        config::window::WINDOW_HEIGHT
+    );
 
     while (!WindowShouldClose())
     {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            // pipeline = generation::GenerationPipeline(config::window::WINDOW_WIDTH,
-            //                                           config::window::WINDOW_HEIGHT,
-            //                                           GetRandomValue(0, 2147483647));
-            // pipeline.generate();
-            auto newPoints = generation::pipeline::relaxVoronoiDiagram(pipeline.voronoiDiagram);
-            pipeline.generateFromPoints(newPoints);
+            voronoiDiagram = generation::pipeline::generate(
+                GetRandomValue(0, 2147483647),
+                config::window::WINDOW_WIDTH,
+                config::window::WINDOW_HEIGHT
+            );
+
+            // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
+            // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
         }
 
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
 
-            renderer::renderPoints(pipeline.voronoiDiagram.seeds, RED);
-            renderer::renderPoints(pipeline.voronoiVertices, BLUE);
-            // renderer::renderTriangles(pipeline.points, pipeline.triangles);
-            renderer::renderEdges(pipeline.voronoiDiagram.vertices, pipeline.voronoiDiagram.edges, PURPLE);
+            renderer::renderPoints(voronoiDiagram.seeds, RED);
+            renderer::renderPoints(voronoiDiagram.vertices, BLUE);
+            renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
 
-            if (pipeline.voronoiDiagram.seeds.size() > 10)
+            if (voronoiDiagram.seeds.size() > 10)
             {
                 renderer::renderPoints({
-                    pipeline.voronoiDiagram.seeds[10]}, GREEN);
+                    voronoiDiagram.seeds[10]}, GREEN);
 
                 std::vector<math::EdgeI> highlightedEdges;
-                for (size_t edgeIdx : pipeline.voronoiDiagram.polygons[10].indices)
+                for (size_t edgeIdx : voronoiDiagram.polygons[10].indices)
                 {
-                    highlightedEdges.push_back(pipeline.voronoiDiagram.edges[edgeIdx]);
+                    highlightedEdges.push_back(voronoiDiagram.edges[edgeIdx]);
                 }
 
-                // Pass the extracted edges to the existing renderer function
-                renderer::renderEdges(pipeline.voronoiDiagram.vertices, highlightedEdges, ORANGE);
+                renderer::renderEdges(voronoiDiagram.vertices, highlightedEdges, ORANGE);
             }
-            }
+        }
         EndDrawing();
     }
 

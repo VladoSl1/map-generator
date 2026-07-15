@@ -28,6 +28,9 @@ target_sources(map_gen_lib
         generation/pipeline/voronoi_diagram.hpp
         generation/pipeline/voronoi_diagram.cpp
 
+        generation/chunkmanager.hpp
+        generation/chunkmanager.cpp
+
         rendering/renderer.hpp
         rendering/renderer.cpp
 )
