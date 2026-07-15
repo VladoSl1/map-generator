@@ -8,6 +8,6 @@
 namespace generation::pipeline
 {
      std::vector<math::Point2Dd> samplePoints(math::RngEngine rngEngine,
-                                              math::UnifIntDistribution& widthInterval,
-                                              math::UnifIntDistribution& heightInterval, int numPoints);
+                                              math::UnifDoubleDistribution& widthInterval,
+                                              math::UnifDoubleDistribution& heightInterval, int numPoints);
 }
