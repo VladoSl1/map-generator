@@ -18,10 +18,11 @@ int main()
     );
     SetTargetFPS(config::window::FPS);
 
+    math::AABB bounds{ {0, config::window::WINDOW_WIDTH}, {0, config::window::WINDOW_HEIGHT} };
+
     generation::pipeline::VoronoiDiagram voronoiDiagram = generation::pipeline::generate(
         42,
-        config::window::WINDOW_WIDTH,
-        config::window::WINDOW_HEIGHT
+        bounds
     );
 
     while (!WindowShouldClose())
@@ -30,8 +31,7 @@ int main()
         {
             voronoiDiagram = generation::pipeline::generate(
                 GetRandomValue(0, 2147483647),
-                config::window::WINDOW_WIDTH,
-                config::window::WINDOW_HEIGHT
+                bounds
             );
 
             // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);

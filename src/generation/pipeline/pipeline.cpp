@@ -1,10 +1,11 @@
 #include "pipeline.hpp"
 
 #include "core/math/point2d.hpp"
+#include "core/math/interval.hpp"
 #include "core/utils/random.hpp"
+
 #include "generation/pipeline/delaunay_triangulation.hpp"
 #include "generation/pipeline/point_sampling.hpp"
-#include "generation/pipeline/voronoi_diagram.hpp"
 
 #include "core/config.hpp"
 
@@ -14,11 +15,11 @@
 
 namespace generation::pipeline
 {
-    VoronoiDiagram generate(uint64_t seed, int width, int height)
+    VoronoiDiagram generate(uint64_t seed, math::AABB bounds)
     {
-        math::RngEngine rngEngine(seed);
-        math::UnifDoubleDistribution heightInterval(0, height);
-        math::UnifDoubleDistribution widthInterval(0, width);
+        utils::RngEngine rngEngine(seed);
+        math::Interval<double> widthInterval(bounds.x_bounds.min, bounds.x_bounds.max);
+        math::Interval<double> heightInterval(bounds.y_bounds.min, bounds.y_bounds.max);
 
         auto seedPoints = pipeline::samplePoints(rngEngine, widthInterval, heightInterval, config::generation::NUM_POINTS);
 

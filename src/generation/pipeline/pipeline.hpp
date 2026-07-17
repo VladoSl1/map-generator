@@ -2,10 +2,13 @@
 
 #include "generation/pipeline/voronoi_diagram.hpp"
 
+#include "core/math/aabb.hpp"
+
+
 #include <vector>
 
 namespace generation::pipeline
 {
-    VoronoiDiagram generate(uint64_t seed, int width, int height);
+    VoronoiDiagram generate(uint64_t seed, math::AABB bounds);
     VoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> points);
 }

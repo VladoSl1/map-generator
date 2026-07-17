@@ -1,10 +1,28 @@
 #include "chunkmanager.hpp"
 
+#include "core/config.hpp"
+
+#include "generation/pipeline/pipeline.hpp"
 
 namespace generation
 {
     void ChunkManager::addChunk(math::Point2Di chunkCoords)
     {
+        long key = hashChunk(chunkCoords);
+
+
+
+        if (chunks.find(key) == chunks.end())
+        {
+            Chunk newChunk(chunkCoords);
+
+            newChunk.chunkCoords = chunkCoords;
+            newChunk.voronoiDiagram = pipeline::generate(
+                hashChunk(chunkCoords),
+                newChunk.bounds
+            );
+        }
+
 
     }
 

@@ -126,11 +126,9 @@ namespace generation::pipeline
         for (const auto& triangle : triangleIndices)
         {
             auto [a, b, c] = triangle.indices;
-            // TODO:: handle exception -- colinear points
-            math::Point2Dd circumcenter = math::calculateCircumcenter(trianglePoints[a],
-                                                                      trianglePoints[b],
-                                                                      trianglePoints[c]);
-            voronoiVertices.push_back(circumcenter);
+            auto circumcenter = math::calculateCircumcenter(trianglePoints[a], trianglePoints[b], trianglePoints[c]);
+            if (!circumcenter.has_value()) continue; // skip degenerate triangles
+            voronoiVertices.push_back(circumcenter.value());
         }
 
         return voronoiVertices;

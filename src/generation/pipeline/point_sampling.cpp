@@ -1,26 +1,25 @@
 #include "point_sampling.hpp"
-#include "core/utils/random.hpp"
-
-#include <vector>
-
 
 namespace generation::pipeline
 {
-    std::vector<math::Point2Dd> samplePoints(math::RngEngine rngEngine,
-                                              math::UnifDoubleDistribution& widthInterval,
-                                              math::UnifDoubleDistribution& heightInterval, int numPoints)
+    std::vector<math::Point2Dd> samplePoints(utils::RngEngine& rngEngine,
+                                             const math::Interval<double>& widthInterval,
+                                             const math::Interval<double>& heightInterval,
+                                             int numPoints)
     {
         std::vector<math::Point2Dd> points;
-        points.reserve(numPoints);
+        points.resize(numPoints);
+
+        auto distX = utils::makeDistribution(widthInterval);
+        auto distY = utils::makeDistribution(heightInterval);
 
         for (int i = 0; i < numPoints; ++i)
         {
-            double x = math::getRandomDouble(rngEngine, widthInterval);
-            double y = math::getRandomDouble(rngEngine, heightInterval);
-            points.emplace_back(x, y);
+            double x = distX(rngEngine);
+            double y = distY(rngEngine);
+            points.push_back({ x, y });
         }
 
         return points;
     }
 }
-
