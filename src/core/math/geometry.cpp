@@ -1,14 +1,17 @@
 #include "geometry.hpp"
 
+#include <cmath>
+#include "constants.hpp"
+
 namespace math
 {
-    Point2Dd calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C)
+    std::optional<Point2Dd> calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C)
     {
         double D = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
-        if (abs(D) < EPSILON)
+        if (std::abs(D) < EPSILON)
         {
-            throw std::runtime_error("Points are collinear; circumcenter is undefined.");
-         }
+            return std::nullopt; // Points are collinear; circumcenter is undefined.
+        }
 
         double Ux = ((A.x * A.x + A.y * A.y) * (B.y - C.y) +
                      (B.x * B.x + B.y * B.y) * (C.y - A.y) +
@@ -18,7 +21,7 @@ namespace math
                      (B.x * B.x + B.y * B.y) * (A.x - C.x) +
                      (C.x * C.x + C.y * C.y) * (B.x - A.x)) / D;
 
-        return {Ux, Uy};
+        return std::optional<Point2Dd>({Ux, Uy});
 
     }
 }

@@ -2,7 +2,7 @@
 #include <random>
 
 
-namespace math
+namespace utils
 {
     using RngEngine = std::mt19937;
     using UnifIntDistribution = std::uniform_int_distribution<int>;
@@ -10,7 +10,7 @@ namespace math
     using UnifDoubleDistribution = std::uniform_real_distribution<double>;
 
 
-    inline float getRandomDouble(RngEngine& engine, UnifDoubleDistribution& range)
+    inline double getRandomDouble(RngEngine& engine, UnifDoubleDistribution& range)
     {
         return range(engine);
     }
