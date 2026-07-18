@@ -16,17 +16,11 @@ namespace generation
         math::Point2Di chunkCoords;
         math::AABB bounds;
 
-        Chunk(math::Point2Di chunkCoords)
-            : chunkCoords(chunkCoords)
-        {
-            // make coordinate (0, 0) the center of the chunk
-            double minX = (static_cast<double>(chunkCoords.x) + 0.5) * config::generation::CHUNK_WIDTH;
-            double minY = (static_cast<double>(chunkCoords.y) + 0.5) * config::generation::CHUNK_HEIGHT;
-            bounds.x_bounds = { minX, minX + config::generation::CHUNK_WIDTH };
-            bounds.y_bounds = { minY, minY + config::generation::CHUNK_HEIGHT };
-        }
-
         pipeline::VoronoiDiagram voronoiDiagram;
+
+        Chunk(math::Point2Di chunkCoords);
+
+        static math::AABB getBounds(math::Point2Di chunkCoords);
     };
 
     class ChunkManager
@@ -38,13 +32,14 @@ namespace generation
             : m_worldSeed(worldSeed)
         {
             preloadChunks({0, 0});
+            addChunk({0, 0});
+
         }
 
         void addChunk(math::Point2Di chunkCoords);
         void removeChunk(math::Point2Di chunkCoords);
 
         Chunk* getChunk(math::Point2Di chunkCoords);
-
 
         void preloadChunks(math::Point2Di centerChunkCoords);
         std::vector<const Chunk*> listAllChunks() const;

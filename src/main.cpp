@@ -51,6 +51,12 @@ int main()
 
             // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
             // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
+            //
+            config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
+
+            chunkManager = generation::ChunkManager(42);
+            chunks = chunkManager.listAllChunks();
+            voronoiDiagram = chunkManager.getChunk({0, 0})->voronoiDiagram;
         }
 
         BeginDrawing();
@@ -63,8 +69,8 @@ int main()
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
                     renderer::renderPoints(voronoiDiagram.seeds, RED);
-                    // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
-                    // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
+                    renderer::renderPoints(voronoiDiagram.vertices, BLUE);
+                    renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
 
                     if (voronoiDiagram.seeds.size() > 10)
                     {
