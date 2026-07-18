@@ -4,11 +4,10 @@
 
 #include "core/math/aabb.hpp"
 
-
 #include <vector>
 
 namespace generation::pipeline
 {
-    VoronoiDiagram generate(uint64_t seed, math::AABB bounds);
+    VoronoiDiagram generatePoints(uint64_t seed, math::AABB bounds);
     VoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> points);
 }
