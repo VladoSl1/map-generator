@@ -33,6 +33,9 @@ target_sources(map_gen_lib
 
         rendering/renderer.hpp
         rendering/renderer.cpp
+
+        rendering/camera_control.hpp
+        rendering/camera_control.cpp
 )
 
 # use PUBLIC so both the app and the tests can see these includes

@@ -38,4 +38,28 @@ namespace renderer
                       color);
         }
     }
+
+    void renderChunkGrid(const generation::ChunkManager& chunkManager)
+    {
+        // Get all currently loaded chunks
+        std::vector<const generation::Chunk*> chunks = chunkManager.listAllChunks();
+
+        for (const generation::Chunk* chunk : chunks)
+        {
+            // Calculate screen coordinates based on chunk coordinates and your config
+            float startX = chunk->bounds.x_bounds.min;
+            float startY = chunk->bounds.y_bounds.min;
+            float width = chunk->bounds.x_bounds.length();
+            float height = chunk->bounds.y_bounds.length();
+
+            Rectangle chunkRect = { startX, startY, width, height };
+
+            // Draw the chunk border (2 pixels thick, gray color)
+            DrawRectangleLinesEx(chunkRect, 2.0f, DARKGRAY);
+
+            // Draw the chunk coordinates in the top-left corner of each chunk
+            const char* coordText = TextFormat("(%d, %d)", chunk->chunkCoords.x, chunk->chunkCoords.y);
+            DrawText(coordText, startX + 5, startY + 5, 20, LIGHTGRAY);
+        }
+    }
 }

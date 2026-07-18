@@ -15,8 +15,8 @@ namespace config
     {
         inline constexpr int NUM_POINTS = 100;
         inline constexpr int INSIDE_PADDING = 15;
-        inline constexpr int CHUNK_WIDTH = 100;
-        inline constexpr int CHUNK_HEIGHT = 100;
+        inline constexpr int CHUNK_WIDTH = 500;
+        inline constexpr int CHUNK_HEIGHT = 500;
     }
 
     namespace renderer

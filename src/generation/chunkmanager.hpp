@@ -19,8 +19,9 @@ namespace generation
         Chunk(math::Point2Di chunkCoords)
             : chunkCoords(chunkCoords)
         {
-            double minX = chunkCoords.x * config::generation::CHUNK_WIDTH;
-            double minY = chunkCoords.y * config::generation::CHUNK_HEIGHT;
+            // make coordinate (0, 0) the center of the chunk
+            double minX = (static_cast<double>(chunkCoords.x) + 0.5) * config::generation::CHUNK_WIDTH;
+            double minY = (static_cast<double>(chunkCoords.y) + 0.5) * config::generation::CHUNK_HEIGHT;
             bounds.x_bounds = { minX, minX + config::generation::CHUNK_WIDTH };
             bounds.y_bounds = { minY, minY + config::generation::CHUNK_HEIGHT };
         }
@@ -36,24 +37,22 @@ namespace generation
         ChunkManager(int worldSeed)
             : m_worldSeed(worldSeed)
         {
-            for (int x = -1; x <= 1; ++x)
-            {
-                for (int y = -1; y <= 1; ++y)
-                {
-                    addChunk({x, y});
-                }
-            }
+            preloadChunks({0, 0});
         }
 
         void addChunk(math::Point2Di chunkCoords);
         void removeChunk(math::Point2Di chunkCoords);
 
+        Chunk* getChunk(math::Point2Di chunkCoords);
+
+
+        void preloadChunks(math::Point2Di centerChunkCoords);
+        std::vector<const Chunk*> listAllChunks() const;
+
 
     private:
         uint64_t m_worldSeed;
-        std::unordered_map<long, Chunk> chunks;
-
-        Chunk* getChunk(math::Point2Di chunkCoords);
+        std::unordered_map<uint64_t, Chunk> chunks;
 
         /* We are using uint64_t to make this program platform independent
          * */

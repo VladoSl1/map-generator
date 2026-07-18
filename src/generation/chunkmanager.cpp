@@ -8,22 +8,19 @@ namespace generation
 {
     void ChunkManager::addChunk(math::Point2Di chunkCoords)
     {
-        long key = hashChunk(chunkCoords);
-
-
+        uint64_t key = hashChunk(chunkCoords);
 
         if (chunks.find(key) == chunks.end())
         {
             Chunk newChunk(chunkCoords);
 
-            newChunk.chunkCoords = chunkCoords;
             newChunk.voronoiDiagram = pipeline::generate(
                 hashChunk(chunkCoords),
                 newChunk.bounds
             );
+
+            chunks.emplace(key, std::move(newChunk));
         }
-
-
     }
 
 
@@ -48,6 +45,29 @@ namespace generation
         }
     }
 
+    void ChunkManager::preloadChunks(math::Point2Di centerChunkCoords)
+    {
+        // we are preloading 3x3 chunks around the center chunk
+        for (int x = -1; x <= 1; ++x)
+        {
+            for (int y = -1; y <= 1; ++y)
+            {
+                addChunk({centerChunkCoords.x + x, centerChunkCoords.y + y});
+            }
+        }
+    }
+
+    std::vector<const Chunk*> ChunkManager::listAllChunks() const
+    {
+        std::vector<const Chunk*> chunkList;
+        for (const auto& pair : chunks)
+        {
+            chunkList.push_back(&(pair.second));
+        }
+
+        return chunkList;
+    }
+
     uint64_t ChunkManager::hashChunk(math::Point2Di chunkCoords) const
     {
         // cast to uint32_t first to drop the sign-extension behavior
@@ -64,5 +84,4 @@ namespace generation
         seed = (seed ^ (seed >> 27)) * 0x94d049bb133111eb;
         return seed ^ (seed >> 31);
     }
-
 }

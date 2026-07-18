@@ -13,7 +13,7 @@ namespace generation::pipeline
         std::vector<math::Point2Dd> seeds;
         std::vector<math::Point2Dd> vertices;
         std::vector<math::EdgeI> edges;
-        // PolygonI elements are indices of edges in the edges vector
+        /* PolygonI elements are indices of edges in the edges vector */
         std::vector<math::PolygonI> polygons;
 
         void assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex);

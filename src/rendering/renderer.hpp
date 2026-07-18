@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "generation/chunkmanager.hpp"
+
 
 namespace renderer
 {
@@ -15,4 +17,6 @@ namespace renderer
     void renderEdges(const std::vector<math::Point2Dd>& points,
                      const std::vector<math::EdgeI>& edges,
                      Color color);
+
+    void renderChunkGrid(const generation::ChunkManager& chunkManager);
 }
