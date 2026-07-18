@@ -1,14 +1,17 @@
 #include "camera_control.hpp"
 #include <raymath.h>
 
+#include "core/config.hpp"
+#include "raylib_adapters.hpp"
+
 namespace renderer
 {
     CameraController::CameraController(int screenWidth, int screenHeight)
     {
-        camera.target = { 0.0f, 0.0f }; // Where the camera is looking in world space
+        camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // Where the camera is looking in world space
         // camera.offset = { screenWidth / 2.0f, screenHeight / 2.0f }; // Screen center
         camera.rotation = 0.0f;
-        camera.zoom = 1.0f;
+        camera.zoom = config::renderer::DEFAULT_CAMERA_ZOOM;
     }
 
     void CameraController::update()
@@ -31,13 +34,13 @@ namespace renderer
             Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
 
             // apply zoom step
-            float zoomIncrement = 0.125f;
+            float zoomIncrement = config::renderer::CAMERA_ZOOM_STEP;
             camera.zoom += wheel * zoomIncrement;
 
             // clamp zoom to prevent flipping or zooming too far out/in
-            // TODO: use intervals
-            if (camera.zoom < 0.1f) camera.zoom = 0.1f;
-            if (camera.zoom > 10.0f) camera.zoom = 10.0f;
+            camera.zoom = std::clamp(camera.zoom,
+                                     config::renderer::CAMERA_ZOOM_RANGE.min,
+                                     config::renderer::CAMERA_ZOOM_RANGE.max);
 
             // shift the offset to the current mouse position and target to the saved world position.
             camera.offset = GetMousePosition();
