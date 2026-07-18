@@ -2,11 +2,14 @@
 
 #include <delaunator.hpp>
 
+#include <cassert>
 
 namespace generation::pipeline
 {
     std::vector<math::TriangleI> triangulate(const std::vector<math::Point2Dd>& points)
     {
+        assert(points.size() >= 3 && "At least 3 points are required for triangulation");
+
         // flatten the points into a single vector of coordinates x0, y0, x1, y1, ...
         // double type because delaunator expects double coordinates
         std::vector<double> coords;

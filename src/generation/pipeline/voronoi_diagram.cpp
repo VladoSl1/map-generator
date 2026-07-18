@@ -72,7 +72,6 @@ namespace generation::pipeline
         size_t i = 0;
         while (i < triangleEdgesWithId.size())
         {
-            log("{}", i);
             if (i+1 < triangleEdgesWithId.size() &&
                 triangleEdgesWithId[i].edge.indices == triangleEdgesWithId[i+1].edge.indices)
             {
@@ -101,6 +100,11 @@ namespace generation::pipeline
     bool VoronoiDiagram::isPolygonClosed(size_t polygonIndex) const
     {
         const auto& polygon = polygons[polygonIndex];
+
+        if (polygon.indices.empty())
+        {
+            return false;
+        }
 
         int total = 0;
         for (const auto& edgeIndex : polygon.indices)
