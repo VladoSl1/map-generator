@@ -5,12 +5,14 @@
 #include <string_view>
 
 
-#define DEBUG_FLAG true;
+#define DEBUG_FLAG
 
 template <typename... Args>
-void log(std::format_string<Args...> fmt, Args&&... args) {
+void log(Args&&... args) {
 #ifdef DEBUG_FLAG
-    std::cout << "[DEBUG]";
-    std::cout << std::format(fmt, std::forward<Args>(args)...) << std::endl;
+    std::cout << "[DEBUG] ";
+
+    // C++17 fold expression: expands to std::cout << arg1 << arg2 << ...
+    (std::cout << ... << std::forward<Args>(args)) << std::endl;
 #endif
 }
