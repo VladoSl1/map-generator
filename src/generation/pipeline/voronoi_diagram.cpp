@@ -1,16 +1,14 @@
 #include "voronoi_diagram.hpp"
-
 #include "core/config.hpp"
 #include "core/math/geometry.hpp"
 #include "core/math/point2d.hpp"
 #include "core/math/sorting.hpp"
-
-
 #include "core/utils/debug.hpp"
+
+#include <cassert>
 
 namespace generation::pipeline
 {
-
     void VoronoiDiagram::assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex)
     {
         polygons[polygonIndex].indices.push_back(edgeIndex);
@@ -22,15 +20,14 @@ namespace generation::pipeline
         vertices.clear();
         edges.clear();
         polygons.clear();
+        openPolygons.clear();
     }
-
 
     struct EdgeWithOwner
     {
         math::EdgeI edge;
         size_t triangleId;
     };
-
 
     /**
      * First, calculate Voronoi vertices by calculating the circumcenters of each triangle.
@@ -46,9 +43,9 @@ namespace generation::pipeline
     {
         clear();
         polygons.resize(triangleSeeds.size());
+        openPolygons.assign(triangleSeeds.size(), false);
 
-        seeds = triangleSeeds; // TODO: consider move semantics
-
+        seeds = triangleSeeds; //TODO: consider move semantics
         vertices = findVoronoiVertices(seeds, triangleIndices);
 
         std::vector<EdgeWithOwner> triangleEdgesWithId;
@@ -59,7 +56,6 @@ namespace generation::pipeline
             // array of edges of the triangle, each edge is represented
             // by two indices of triangleSeeds
             auto triEdges = math::convertToEdges(triangleIndices[i]);
-
             for (size_t j = 0; j < triEdges.size(); ++j)
             {
                 triangleEdgesWithId.push_back({ triEdges[j], i });
@@ -75,7 +71,7 @@ namespace generation::pipeline
             if (i+1 < triangleEdgesWithId.size() &&
                 triangleEdgesWithId[i].edge.indices == triangleEdgesWithId[i+1].edge.indices)
             {
-                // add edge between the two voronoi vertices corresponding to their respective triangles
+                // edge shared by 2 Delaunay triangles (Internal Polygon Edge)
                 edges.push_back(
                     math::EdgeI{triangleEdgesWithId[i].triangleId, triangleEdgesWithId[i+1].triangleId}
                 );
@@ -83,42 +79,23 @@ namespace generation::pipeline
                 assignEdgeToPolygon(edges.size() - 1, triangleEdgesWithId[i].edge[0]);
                 assignEdgeToPolygon(edges.size() - 1, triangleEdgesWithId[i].edge[1]);
 
-                // since the initial graph is planar, only two triangles can share an edge
                 i += 2;
             }
-            // the edge should go to infinity
-            else
+            else // the edge should go to ininite polygon (External Polygon Edge)
             {
-                // TODO: should we handle this case? maybe we can just ignore it for now
+                openPolygons[triangleEdgesWithId[i].edge[0]] = true;
+                openPolygons[triangleEdgesWithId[i].edge[1]] = true;
+
                 i += 1;
             }
-
         }
     }
 
-    // if the polygon is closed, every vertex should be connected to exactly two edges, so the XOR of all vertex indices should be 0
     bool VoronoiDiagram::isPolygonClosed(size_t polygonIndex) const
     {
-        const auto& polygon = polygons[polygonIndex];
-
-        if (polygon.indices.empty())
-        {
-            return false;
-        }
-
-        int total = 0;
-        for (const auto& edgeIndex : polygon.indices)
-        {
-            const auto& edge = edges[edgeIndex];
-            total ^= edge[0];
-            total ^= edge[1];
-        }
-
-        return total == 0;
+        if (polygonIndex >= openPolygons.size()) return false;
+        return !openPolygons[polygonIndex];
     }
-
-
-
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
     std::vector<math::Point2Dd> findVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
@@ -131,7 +108,7 @@ namespace generation::pipeline
         {
             auto [a, b, c] = triangle.indices;
             auto circumcenter = math::calculateCircumcenter(trianglePoints[a], trianglePoints[b], trianglePoints[c]);
-            if (!circumcenter.has_value()) continue; // skip degenerate triangles
+            if (!circumcenter.has_value()) continue;  // skip degenerate triangles
             voronoiVertices.push_back(circumcenter.value());
         }
 
@@ -144,8 +121,6 @@ namespace generation::pipeline
 
         for (size_t i = 0; i < voronoiDiagram.polygons.size(); ++i)
         {
-            const auto& polygon = voronoiDiagram.polygons[i];
-
             if (!voronoiDiagram.isPolygonClosed(i)) // ignore polygons whose edges go to infinity
             {
                 newSeeds[i] = voronoiDiagram.seeds[i];
@@ -154,17 +129,14 @@ namespace generation::pipeline
 
             math::Point2Dd centroid{0, 0};
 
-            for (const auto& edgeIndex : polygon.indices)
+            for (const auto& edgeIndex : voronoiDiagram.polygons[i].indices)
             {
                 const auto& edge = voronoiDiagram.edges[edgeIndex];
-                const auto& vertex1 = voronoiDiagram.vertices[edge[0]];
-                const auto& vertex2 = voronoiDiagram.vertices[edge[1]];
-
-                centroid += vertex1.cast<double>();
-                centroid += vertex2.cast<double>();
+                centroid += voronoiDiagram.vertices[edge[0]].cast<double>();
+                centroid += voronoiDiagram.vertices[edge[1]].cast<double>();
             }
 
-            centroid /= static_cast<double>(polygon.indices.size() * 2);
+            centroid /= static_cast<double>(voronoiDiagram.polygons[i].indices.size() * 2);
             newSeeds[i] = centroid;
         }
 
