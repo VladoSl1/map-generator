@@ -68,14 +68,14 @@ int main()
                 for (const auto& chunk : chunks)
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
-                    renderer::renderPoints(voronoiDiagram.seeds, RED);
-                    renderer::renderPoints(voronoiDiagram.vertices, BLUE);
+                    // renderer::renderPoints(voronoiDiagram.seeds, RED);
+                    // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
 
                     if (voronoiDiagram.seeds.size() > 10)
                     {
-                        renderer::renderPoints({
-                            voronoiDiagram.seeds[10]}, GREEN);
+                        // renderer::renderPoints({
+                        //     voronoiDiagram.seeds[10]}, GREEN);
 
                         std::vector<math::EdgeI> highlightedEdges;
                         for (size_t edgeIdx : voronoiDiagram.polygons[10].indices)
@@ -83,7 +83,7 @@ int main()
                             highlightedEdges.push_back(voronoiDiagram.edges[edgeIdx]);
                         }
 
-                        renderer::renderEdges(voronoiDiagram.vertices, highlightedEdges, ORANGE);
+                        // renderer::renderEdges(voronoiDiagram.vertices, highlightedEdges, ORANGE);
                     }
                 }
 

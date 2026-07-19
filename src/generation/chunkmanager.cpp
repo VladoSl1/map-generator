@@ -1,11 +1,8 @@
 #include "chunkmanager.hpp"
-
 #include "core/config.hpp"
-
 #include "core/math/point2d.hpp"
 #include "generation/pipeline/pipeline.hpp"
 #include "generation/pipeline/point_sampling.hpp"
-
 #include "core/utils/debug.hpp"
 #include <cstdint>
 
@@ -28,13 +25,11 @@ namespace generation
     {
         uint64_t key = hashChunk(chunkCoords);
 
-        if (requestChunk(chunkCoords)->state == Chunk::State::LOADED)
-        {
-            return;
-        }
+        auto centerChunk = requestChunk(chunkCoords);
+        if (centerChunk->state == Chunk::State::LOADED) return;
 
         std::vector<math::Point2Dd> combinedSeeds;
-        combinedSeeds.reserve(config::generation::NUM_POINTS * 9);
+        combinedSeeds.reserve(9 * config::generation::NUM_POINTS);
 
         preloadChunks(chunkCoords);
 
@@ -44,109 +39,68 @@ namespace generation
             {
                 math::Point2Di neighborChunkCoords = {chunkCoords.x + x, chunkCoords.y + y};
                 std::shared_ptr<Chunk> neighborChunk = getChunk(neighborChunkCoords);
-
-                // since Point2Dd is a POD type, we can use insert is same as move
-                if (neighborChunk->state == Chunk::State::PRELOADED)
-                {
-                    combinedSeeds.insert(combinedSeeds.end(), neighborChunk->preloadedSeeds.begin(), neighborChunk->preloadedSeeds.end());
-                }
-                else if (neighborChunk->state == Chunk::State::LOADED)
-                {
-                    combinedSeeds.insert(combinedSeeds.end(), neighborChunk->voronoiDiagram.seeds.begin(), neighborChunk->voronoiDiagram.seeds.end());
-                }
+                combinedSeeds.insert(combinedSeeds.end(), neighborChunk->preloadedSeeds.begin(), neighborChunk->preloadedSeeds.end());
             }
         }
 
-
         pipeline::VoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
-        std::vector<math::Point2Dd> relaxedPoints = extendedDiagram.seeds; // TODO: consider maybe leave empty
 
-        for (int x = 0; x < config::generation::RELAXATION_ITERATIONS; ++x)
+        for (int i = 0; i < config::generation::RELAXATION_ITERATIONS; ++i)
         {
-            relaxedPoints = pipeline::relaxVoronoiDiagram(extendedDiagram);
+            std::vector<math::Point2Dd> relaxedPoints = pipeline::relaxVoronoiDiagram(extendedDiagram);
             extendedDiagram = pipeline::generateFromPoints(relaxedPoints);
         }
 
-        // center chunk is at the center of 3x3 grid -> offset is 4 Chunks
-        std::vector<math::Point2Dd> relaxedCenterPoints(
-                relaxedPoints.begin() + config::generation::NUM_POINTS * 4,
-                relaxedPoints.begin() + config::generation::NUM_POINTS * 5);
-
-        auto centerChunk = requestChunk(chunkCoords);
-        centerChunk->voronoiDiagram = pipeline::generateFromPoints(relaxedCenterPoints);
-
-        log("Loaded chunk at coords: (" + std::to_string(chunkCoords.x) + ", " + std::to_string(chunkCoords.y) + ")");
-        for (int i = 0; i < centerChunk->voronoiDiagram.seeds.size(); ++i)
-        {
-            log("Seed " + std::to_string(i) + ": (" + std::to_string(centerChunk->voronoiDiagram.seeds[i].x) + ", " + std::to_string(centerChunk->voronoiDiagram.seeds[i].y) + ")");
-        }
-
-        chunks.emplace(key, std::move(centerChunk));
-        centerChunk->preloadedSeeds.clear();
+        size_t startIndex = 4*config::generation::NUM_POINTS;
+        size_t endIndex = 5*config::generation::NUM_POINTS;
+        centerChunk->voronoiDiagram = extendedDiagram.extractVoronoiSubset(startIndex, endIndex);
+        // centerChunk->preloadedSeeds.clear();
         centerChunk->state = Chunk::State::LOADED;
     }
 
-
     void ChunkManager::removeChunk(math::Point2Di chunkCoords)
     {
-        //TODO:
+        // TODO:
     }
-
 
     std::shared_ptr<Chunk> ChunkManager::addChunk(math::Point2Di chunkCoords)
     {
         std::shared_ptr<Chunk> newChunk = std::make_shared<Chunk>(chunkCoords);
         chunks.emplace(hashChunk(chunkCoords), newChunk);
-
         return newChunk;
     }
 
     std::shared_ptr<Chunk> ChunkManager::getChunk(math::Point2Di chunkCoords) const
     {
         uint64_t key = hashChunk(chunkCoords);
-
         auto it = chunks.find(key);
-        if (it != chunks.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            return nullptr;
-        }
+        if (it != chunks.end()) return it->second;
+        return nullptr;
     }
 
     std::shared_ptr<Chunk> ChunkManager::requestChunk(math::Point2Di chunkCoords)
     {
         auto chunk = getChunk(chunkCoords);
-        if (chunk == nullptr)
-        {
-            chunk = addChunk(chunkCoords);
-        }
-
+        if (chunk == nullptr) chunk = addChunk(chunkCoords);
         return chunk;
     }
-
 
     void ChunkManager::preloadChunk(math::Point2Di chunkCoords)
     {
         auto chunk = requestChunk(chunkCoords);
+        if (chunk->state != Chunk::State::UNLOADED) return;
 
-        if (chunk->state != Chunk::State::UNLOADED)
-        {
-            return;
-        }
-
-        chunk->preloadedSeeds = pipeline::samplePoints(hashChunk(chunkCoords),
-                                                       Chunk::getBounds(chunkCoords),
-                                                       config::generation::NUM_POINTS);
+        chunk->preloadedSeeds = pipeline::samplePoints(
+            hashChunk(chunkCoords),
+            Chunk::getBounds(chunkCoords),
+            config::generation::NUM_POINTS
+        );
         chunk->state = Chunk::State::PRELOADED;
     }
 
-
     void ChunkManager::preloadChunks(math::Point2Di centerChunkCoords)
     {
-        // we are preloading 3x3 chunks around the center chunk
+        // preload 3x3 grid of chunks around the center chunk
         for (int x = -1; x <= 1; ++x)
         {
             for (int y = -1; y <= 1; ++y)
@@ -163,7 +117,6 @@ namespace generation
         {
             chunkList.push_back(pair.second);
         }
-
         return chunkList;
     }
 
@@ -174,7 +127,6 @@ namespace generation
         uint32_t uy = static_cast<uint32_t>(chunkCoords.y);
 
         uint64_t seed = (static_cast<uint64_t>(ux) << 32) | uy;
-
         seed ^= m_worldSeed;
 
         // alg: https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64

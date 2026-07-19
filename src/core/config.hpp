@@ -7,15 +7,15 @@ namespace config
 {
     namespace window
     {
-        inline constexpr int WINDOW_HEIGHT = 1000;
-        inline constexpr int WINDOW_WIDTH = 1000;
+        inline constexpr int WINDOW_HEIGHT = 1300;
+        inline constexpr int WINDOW_WIDTH = 1300;
         inline constexpr const char* TITLE = "Realistic 2D Map Generator";
         inline constexpr const int FPS = 24;
     }
 
     namespace generation
     {
-        inline constexpr int NUM_POINTS = 200;
+        inline constexpr int NUM_POINTS = 1000;
         inline constexpr int INSIDE_PADDING = 15;
         inline constexpr int CHUNK_WIDTH = 500;
         inline constexpr int CHUNK_HEIGHT = 500;

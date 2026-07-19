@@ -24,6 +24,9 @@ namespace generation::pipeline
         void clear();
 
         bool isPolygonClosed(size_t polygonIndex) const;
+
+        VoronoiDiagram extractVoronoiSubset(size_t seedStartIndex, size_t seedEndIndex) const;
+
     };
 
     std::vector<math::Point2Dd> findVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,

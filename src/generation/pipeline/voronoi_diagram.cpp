@@ -5,7 +5,7 @@
 #include "core/math/sorting.hpp"
 #include "core/utils/debug.hpp"
 
-#include <cassert>
+#include <climits>
 
 namespace generation::pipeline
 {
@@ -96,6 +96,60 @@ namespace generation::pipeline
         if (polygonIndex >= openPolygons.size()) return false;
         return !openPolygons[polygonIndex];
     }
+
+
+    VoronoiDiagram VoronoiDiagram::extractVoronoiSubset(size_t seedStartIndex, size_t seedEndIndex) const
+    {
+        VoronoiDiagram subsetVoronoi;
+        size_t numSeeds = seedEndIndex - seedStartIndex;
+
+        subsetVoronoi.seeds = std::vector<math::Point2Dd>(seeds.begin() + seedStartIndex,
+                                                          seeds.begin() + seedEndIndex);
+
+        subsetVoronoi.polygons.resize(numSeeds);
+        subsetVoronoi.openPolygons.resize(numSeeds);
+
+        constexpr size_t UNMAPPED = std::numeric_limits<size_t>::max();
+
+        std::vector<size_t> edgeMap(edges.size(), UNMAPPED);
+        std::vector<size_t> vertexMap(vertices.size(), UNMAPPED);
+
+        for (size_t i = seedStartIndex; i < seedEndIndex; ++i)
+        {
+            size_t localIndex = i - seedStartIndex;
+            subsetVoronoi.openPolygons[localIndex] = openPolygons[i];
+
+            for (size_t oldEdgeIdx : polygons[i].indices)
+            {
+                // if the edge was not already processed
+                if (edgeMap[oldEdgeIdx] == UNMAPPED)
+                {
+                    edgeMap[oldEdgeIdx] = subsetVoronoi.edges.size(); // "push" the edge to the end
+
+                    math::EdgeI oldEdge = edges[oldEdgeIdx];
+                    math::EdgeI newEdge;
+
+                    // Map over vertices for this edge
+                    for (int v = 0; v < 2; ++v)
+                    {
+                        size_t oldVertIdx = oldEdge[v];
+                        if (vertexMap[oldVertIdx] == UNMAPPED)
+                        {
+                            vertexMap[oldVertIdx] = subsetVoronoi.vertices.size();
+                            subsetVoronoi.vertices.push_back(vertices[oldVertIdx]);
+                        }
+                        newEdge[v] = vertexMap[oldVertIdx];
+                    }
+                    subsetVoronoi.edges.push_back(newEdge);
+                }
+
+                subsetVoronoi.polygons[localIndex].indices.push_back(edgeMap[oldEdgeIdx]);
+            }
+        }
+
+        return std::move(subsetVoronoi);
+    }
+
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
     std::vector<math::Point2Dd> findVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
