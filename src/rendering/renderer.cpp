@@ -42,9 +42,9 @@ namespace renderer
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {
         // Get all currently loaded chunks
-        std::vector<const generation::Chunk*> chunks = chunkManager.listAllChunks();
+        auto chunks = chunkManager.listAllChunks();
 
-        for (const generation::Chunk* chunk : chunks)
+        for (const auto chunk : chunks)
         {
             // Calculate screen coordinates based on chunk coordinates and your config
             float startX = chunk->bounds.x_bounds.min;

@@ -13,10 +13,19 @@ namespace generation
 {
     struct Chunk
     {
+        enum class State
+        {
+            UNLOADED,
+            PRELOADED,
+            LOADED
+        };
+
         math::Point2Di chunkCoords;
         math::AABB bounds;
 
-        pipeline::VoronoiDiagram voronoiDiagram;
+        std::vector<math::Point2Dd> preloadedSeeds;
+        pipeline::VoronoiDiagram voronoiDiagram; //TODO: consider using pointer to seeds in voronoiDiagram to avoid copying seeds when loading chunks
+        State state = State::UNLOADED;
 
         Chunk(math::Point2Di chunkCoords);
 
@@ -32,22 +41,26 @@ namespace generation
             : m_worldSeed(worldSeed)
         {
             preloadChunks({0, 0});
-            addChunk({0, 0});
+            loadChunk({0, 0});
 
         }
 
-        void addChunk(math::Point2Di chunkCoords);
+        void loadChunk(math::Point2Di chunkCoords);
         void removeChunk(math::Point2Di chunkCoords);
 
-        Chunk* getChunk(math::Point2Di chunkCoords);
+        std::shared_ptr<Chunk> addChunk(math::Point2Di chunkCoords);
+        std::shared_ptr<Chunk> getChunk(math::Point2Di chunkCoords) const;
+        std::shared_ptr<Chunk> requestChunk(math::Point2Di chunkCoords);
 
+
+        void preloadChunk(math::Point2Di chunkCoords);
         void preloadChunks(math::Point2Di centerChunkCoords);
-        std::vector<const Chunk*> listAllChunks() const;
+        std::vector<std::shared_ptr<Chunk>> listAllChunks() const;
 
 
     private:
         uint64_t m_worldSeed;
-        std::unordered_map<uint64_t, Chunk> chunks;
+        std::unordered_map<uint64_t, std::shared_ptr<Chunk>> chunks; // TODO: consider using unique_ptr
 
         /* We are using uint64_t to make this program platform independent
          * */

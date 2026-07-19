@@ -7,6 +7,7 @@
 #include "generation/pipeline/point_sampling.hpp"
 
 #include "core/utils/debug.hpp"
+#include <cstdint>
 
 namespace generation
 {
@@ -23,37 +24,39 @@ namespace generation
         return { {minX, minX + config::generation::CHUNK_WIDTH}, {minY, minY + config::generation::CHUNK_HEIGHT} };
     }
 
-    void ChunkManager::addChunk(math::Point2Di chunkCoords)
+    void ChunkManager::loadChunk(math::Point2Di chunkCoords)
     {
         uint64_t key = hashChunk(chunkCoords);
 
-        if (chunks.find(key) != chunks.end()) return;
-
+        if (requestChunk(chunkCoords)->state == Chunk::State::LOADED)
+        {
+            return;
+        }
 
         std::vector<math::Point2Dd> combinedSeeds;
         combinedSeeds.reserve(config::generation::NUM_POINTS * 9);
 
-        // since Point2Dd is a POD type, we can use insert is same as move
-        // center chunk is added first, so that its easier to access
-        auto centerSeeds = pipeline::samplePoints(hashChunk(chunkCoords), Chunk::getBounds(chunkCoords), config::generation::NUM_POINTS);
-        combinedSeeds.insert(combinedSeeds.end(), centerSeeds.begin(), centerSeeds.end());
-
+        preloadChunks(chunkCoords);
 
         for (int x = -1; x <= 1; ++x)
         {
             for (int y = -1; y <= 1; ++y)
             {
-                if (x == 0 && y == 0) continue; // center chunk already added
+                math::Point2Di neighborChunkCoords = {chunkCoords.x + x, chunkCoords.y + y};
+                std::shared_ptr<Chunk> neighborChunk = getChunk(neighborChunkCoords);
 
-                math::Point2Di neighborCoords{chunkCoords.x + x, chunkCoords.y + y};
-                uint64_t neighborKey = hashChunk(neighborCoords);
-                auto neighborSeeds = pipeline::samplePoints(neighborKey,
-                                                             Chunk::getBounds(neighborCoords),
-                                                             config::generation::NUM_POINTS);
-
-                combinedSeeds.insert(combinedSeeds.end(), neighborSeeds.begin(), neighborSeeds.end());
+                // since Point2Dd is a POD type, we can use insert is same as move
+                if (neighborChunk->state == Chunk::State::PRELOADED)
+                {
+                    combinedSeeds.insert(combinedSeeds.end(), neighborChunk->preloadedSeeds.begin(), neighborChunk->preloadedSeeds.end());
+                }
+                else if (neighborChunk->state == Chunk::State::LOADED)
+                {
+                    combinedSeeds.insert(combinedSeeds.end(), neighborChunk->voronoiDiagram.seeds.begin(), neighborChunk->voronoiDiagram.seeds.end());
+                }
             }
         }
+
 
         pipeline::VoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
         std::vector<math::Point2Dd> relaxedPoints = extendedDiagram.seeds; // TODO: consider maybe leave empty
@@ -64,32 +67,48 @@ namespace generation
             extendedDiagram = pipeline::generateFromPoints(relaxedPoints);
         }
 
+        // center chunk is at the center of 3x3 grid -> offset is 4 Chunks
         std::vector<math::Point2Dd> relaxedCenterPoints(
-                relaxedPoints.begin(),
-                relaxedPoints.begin() + config::generation::NUM_POINTS
-            );
+                relaxedPoints.begin() + config::generation::NUM_POINTS * 4,
+                relaxedPoints.begin() + config::generation::NUM_POINTS * 5);
 
-        Chunk newChunk(chunkCoords);
-        newChunk.voronoiDiagram = pipeline::generateFromPoints(relaxedPoints);
+        auto centerChunk = requestChunk(chunkCoords);
+        centerChunk->voronoiDiagram = pipeline::generateFromPoints(relaxedCenterPoints);
 
-        chunks.emplace(key, std::move(newChunk));
+        log("Loaded chunk at coords: (" + std::to_string(chunkCoords.x) + ", " + std::to_string(chunkCoords.y) + ")");
+        for (int i = 0; i < centerChunk->voronoiDiagram.seeds.size(); ++i)
+        {
+            log("Seed " + std::to_string(i) + ": (" + std::to_string(centerChunk->voronoiDiagram.seeds[i].x) + ", " + std::to_string(centerChunk->voronoiDiagram.seeds[i].y) + ")");
+        }
+
+        chunks.emplace(key, std::move(centerChunk));
+        centerChunk->preloadedSeeds.clear();
+        centerChunk->state = Chunk::State::LOADED;
     }
 
 
     void ChunkManager::removeChunk(math::Point2Di chunkCoords)
     {
-
+        //TODO:
     }
 
 
-    Chunk* ChunkManager::getChunk(math::Point2Di chunkCoords)
+    std::shared_ptr<Chunk> ChunkManager::addChunk(math::Point2Di chunkCoords)
     {
-        long key = hashChunk(chunkCoords);
+        std::shared_ptr<Chunk> newChunk = std::make_shared<Chunk>(chunkCoords);
+        chunks.emplace(hashChunk(chunkCoords), newChunk);
+
+        return newChunk;
+    }
+
+    std::shared_ptr<Chunk> ChunkManager::getChunk(math::Point2Di chunkCoords) const
+    {
+        uint64_t key = hashChunk(chunkCoords);
 
         auto it = chunks.find(key);
         if (it != chunks.end())
         {
-            return &(it->second);
+            return it->second;
         }
         else
         {
@@ -97,24 +116,52 @@ namespace generation
         }
     }
 
+    std::shared_ptr<Chunk> ChunkManager::requestChunk(math::Point2Di chunkCoords)
+    {
+        auto chunk = getChunk(chunkCoords);
+        if (chunk == nullptr)
+        {
+            chunk = addChunk(chunkCoords);
+        }
+
+        return chunk;
+    }
+
+
+    void ChunkManager::preloadChunk(math::Point2Di chunkCoords)
+    {
+        auto chunk = requestChunk(chunkCoords);
+
+        if (chunk->state != Chunk::State::UNLOADED)
+        {
+            return;
+        }
+
+        chunk->preloadedSeeds = pipeline::samplePoints(hashChunk(chunkCoords),
+                                                       Chunk::getBounds(chunkCoords),
+                                                       config::generation::NUM_POINTS);
+        chunk->state = Chunk::State::PRELOADED;
+    }
+
+
     void ChunkManager::preloadChunks(math::Point2Di centerChunkCoords)
     {
         // we are preloading 3x3 chunks around the center chunk
-        // for (int x = -1; x <= 1; ++x)
-        // {
-        //     for (int y = -1; y <= 1; ++y)
-        //     {
-        //         addChunk({centerChunkCoords.x + x, centerChunkCoords.y + y});
-        //     }
-        // }
+        for (int x = -1; x <= 1; ++x)
+        {
+            for (int y = -1; y <= 1; ++y)
+            {
+                preloadChunk({centerChunkCoords.x + x, centerChunkCoords.y + y});
+            }
+        }
     }
 
-    std::vector<const Chunk*> ChunkManager::listAllChunks() const
+    std::vector<std::shared_ptr<Chunk>> ChunkManager::listAllChunks() const
     {
-        std::vector<const Chunk*> chunkList;
+        std::vector<std::shared_ptr<Chunk>> chunkList;
         for (const auto& pair : chunks)
         {
-            chunkList.push_back(&(pair.second));
+            chunkList.push_back(pair.second);
         }
 
         return chunkList;
