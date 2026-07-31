@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include <vector>
+
 #include "core/config.hpp"
 
 #include "raylib_adapters.hpp"
@@ -10,7 +12,8 @@ namespace renderer
     {
         for (const auto& point : points)
         {
-            DrawCircle(point.x, point.y, config::renderer::POINT_RADIUS, color);
+            DrawCircle(static_cast<int>(point.x),
+                       static_cast<int>(point.y), config::renderer::POINT_RADIUS, color);
         }
     }
 
@@ -41,18 +44,16 @@ namespace renderer
 
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {
-        // Get all currently loaded chunks
         auto chunks = chunkManager.listAllChunks();
 
-        for (const auto chunk : chunks)
+        for (const auto& chunk : chunks)
         {
-            // Calculate screen coordinates based on chunk coordinates and your config
             float startX = chunk->bounds.x_bounds.min;
             float startY = chunk->bounds.y_bounds.min;
             float width = chunk->bounds.x_bounds.length();
             float height = chunk->bounds.y_bounds.length();
 
-            Rectangle chunkRect = { startX, startY, width, height };
+            Rectangle chunkRect{ startX, startY, width, height };
 
             // Draw the chunk border (2 pixels thick, gray color)
             DrawRectangleLinesEx(chunkRect, 2.0f, DARKGRAY);

@@ -4,6 +4,7 @@
 
 ```bash
 cmake -B build -G Ninja
+cmake -B build -G Ninja -DCMAKE_OSX_ARCHITECTURES=arm64
 cmake --build build
 ```
 
