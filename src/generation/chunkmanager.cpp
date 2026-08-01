@@ -63,7 +63,8 @@ namespace generation
 
     void ChunkManager::removeChunk(math::Point2Di chunkCoords)
     {
-        // TODO:
+        // TODO:consider maybe storing chunks on disc instead of just rerendering them
+        chunks.erase(hashChunk(chunkCoords));
     }
 
     std::shared_ptr<Chunk> ChunkManager::addChunk(math::Point2Di chunkCoords)

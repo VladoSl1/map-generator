@@ -10,6 +10,8 @@ namespace renderer
     {
         camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // Where the camera is looking in world space
         camera.rotation = 0.0f;
+        camera.offset = { static_cast<float>(screenWidth) / 2.0f,
+                          static_cast<float>(screenHeight) / 2.0f };
         camera.zoom = config::renderer::DEFAULT_CAMERA_ZOOM;
     }
 

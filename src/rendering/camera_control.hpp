@@ -20,6 +20,6 @@ namespace renderer
         const Camera2D& getCamera() const;
 
     private:
-        Camera2D camera;
+        Camera2D camera = { 0 };
     };
 }

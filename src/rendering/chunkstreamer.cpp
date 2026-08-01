@@ -23,13 +23,19 @@ namespace renderer
         const math::Point2Di topLeft = generation::ChunkManager::worldToChunkCoords({viewBounds.x_bounds.min, viewBounds.y_bounds.min});
         const math::Point2Di bottomRight  = generation::ChunkManager::worldToChunkCoords({viewBounds.x_bounds.max, viewBounds.y_bounds.max});
 
-        log(viewBounds.x_bounds.min, " ", viewBounds.x_bounds.max, " ", viewBounds.y_bounds.min, " ", viewBounds.y_bounds.max, " | ");
-        log(topLeft.x, " ", topLeft.y, " ", bottomRight.x, " ", bottomRight.y);
+        // TODO: this is very slow, reason why?
 
-        log(topLeft.x - config::renderer::CHUNK_RENDER_DISTANCE, " ", topLeft.y - config::renderer::CHUNK_RENDER_DISTANCE, " ", bottomRight.x + config::renderer::CHUNK_RENDER_DISTANCE, " ", bottomRight.y + config::renderer::CHUNK_RENDER_DISTANCE);
-
-        log("\n");
-
+        // auto allChunks = m_chunkManager->listAllChunks();
+        // for (const auto& chunk : allChunks)
+        // {
+        //     math::Point2Di chunkCoords = chunk->chunkCoords;
+        //     if (chunkCoords.x < topLeft.x || chunkCoords.x > bottomRight.y ||
+        //         chunkCoords.y < bottomRight.y || chunkCoords.y > topLeft.y)
+        //     {
+        //         m_chunkManager->removeChunk(chunkCoords);
+        //     }
+        // }
+        //
 
         for (int x = topLeft.x - config::renderer::CHUNK_RENDER_DISTANCE; x <= bottomRight.x + config::renderer::CHUNK_RENDER_DISTANCE; ++x)
         {

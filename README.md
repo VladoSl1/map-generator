@@ -13,6 +13,11 @@ cmake --build build
 ```bash
 ./build/src/realistic_map_generator
 ```
+# Run and build (MacOS and Linux)
+```bash
+ cmake --build build && ./build/src/realistic_map_generator
+
+```
 
 # Installation
 
