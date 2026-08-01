@@ -14,10 +14,11 @@ namespace generation
         bounds = getBounds(chunkCoords);
     }
 
+    // TODO: consider moving this somewhere else for better encapsulation
     math::AABB Chunk::getBounds(math::Point2Di chunkCoords)
     {
-        double minX = (static_cast<double>(chunkCoords.x) + 0.5) * config::generation::CHUNK_WIDTH;
-        double minY = (static_cast<double>(chunkCoords.y) + 0.5) * config::generation::CHUNK_HEIGHT;
+        double minX = (static_cast<double>(chunkCoords.x) + 0.0) * config::generation::CHUNK_WIDTH;
+        double minY = (static_cast<double>(chunkCoords.y) + 0.0) * config::generation::CHUNK_HEIGHT;
         return { {minX, minX + config::generation::CHUNK_WIDTH}, {minY, minY + config::generation::CHUNK_HEIGHT} };
     }
 
@@ -113,6 +114,8 @@ namespace generation
     std::vector<std::shared_ptr<Chunk>> ChunkManager::listAllChunks() const
     {
         std::vector<std::shared_ptr<Chunk>> chunkList;
+        chunkList.reserve(chunks.size());
+
         for (const auto& pair : chunks)
         {
             chunkList.push_back(pair.second);
@@ -135,4 +138,5 @@ namespace generation
         seed = (seed ^ (seed >> 27)) * 0x94d049bb133111eb;
         return seed ^ (seed >> 31);
     }
+
 }

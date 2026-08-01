@@ -9,7 +9,6 @@ namespace renderer
     CameraController::CameraController(int screenWidth, int screenHeight)
     {
         camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // Where the camera is looking in world space
-        // camera.offset = { screenWidth / 2.0f, screenHeight / 2.0f }; // Screen center
         camera.rotation = 0.0f;
         camera.zoom = config::renderer::DEFAULT_CAMERA_ZOOM;
     }
@@ -47,6 +46,20 @@ namespace renderer
             camera.target = mouseWorldPos;
         }
     }
+
+    math::AABB CameraController::getViewBounds() const
+    {
+        Vector2 topLeft = GetScreenToWorld2D({0, 0}, camera);
+        Vector2 bottomRight = GetScreenToWorld2D({config::window::WINDOW_WIDTH,
+                                                    config::window::WINDOW_HEIGHT}, camera);
+
+        return {
+            {topLeft.x, bottomRight.x},
+            {topLeft.y, bottomRight.y}
+        };
+    }
+
+
 
     const Camera2D& CameraController::getCamera() const
     {

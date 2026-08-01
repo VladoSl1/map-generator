@@ -36,6 +36,9 @@ target_sources(map_gen_lib
 
         rendering/camera_control.hpp
         rendering/camera_control.cpp
+
+        rendering/chunkstreamer.hpp
+        rendering/chunkstreamer.cpp
 )
 
 # use PUBLIC so both the app and the tests can see these includes

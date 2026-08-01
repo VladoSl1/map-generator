@@ -60,6 +60,15 @@ namespace generation
         void preloadChunks(math::Point2Di centerChunkCoords);
         std::vector<std::shared_ptr<Chunk>> listAllChunks() const;
 
+        static math::Point2Di worldToChunkCoords(math::Point2Dd worldCoords)
+        {
+            return {
+                static_cast<int>(std::floor(worldCoords.x / config::generation::CHUNK_WIDTH)),
+                static_cast<int>(std::floor(worldCoords.y / config::generation::CHUNK_HEIGHT))
+            };
+        }
+
+
     private:
         uint64_t m_worldSeed;
         std::unordered_map<uint64_t, std::shared_ptr<Chunk>> chunks; // TODO: consider using unique_ptr
