@@ -4,6 +4,8 @@
 
 #include "core/math/aabb.hpp"
 
+#include <memory>
+
 
 namespace renderer
 {
@@ -11,12 +13,12 @@ namespace renderer
     class ChunkStreamer
     {
     public:
-        ChunkStreamer(std::shared_ptr<generation::ChunkManager> chunkManager);
+        explicit ChunkStreamer(std::shared_ptr<generation::ChunkManager> chunkManager);
 
         void updateLoadedChunks(const math::AABB& viewBounds);
 
     private:
-        std::shared_ptr<generation::ChunkManager> chunkManager;
+        std::shared_ptr<generation::ChunkManager> m_chunkManager;
 
 
     };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "generation/pipeline/voronoi_diagram.hpp"
-
 #include "core/math/aabb.hpp"
 
 #include <vector>

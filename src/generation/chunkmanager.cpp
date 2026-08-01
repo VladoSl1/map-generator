@@ -9,9 +9,8 @@
 namespace generation
 {
     Chunk::Chunk(math::Point2Di chunkCoords)
-        : chunkCoords(chunkCoords)
+        : chunkCoords(chunkCoords), bounds(getBounds(chunkCoords))
     {
-        bounds = getBounds(chunkCoords);
     }
 
     // TODO: consider moving this somewhere else for better encapsulation
@@ -24,13 +23,16 @@ namespace generation
 
     void ChunkManager::loadChunk(math::Point2Di chunkCoords)
     {
-        uint64_t key = hashChunk(chunkCoords);
+        const uint64_t key = hashChunk(chunkCoords);
 
         auto centerChunk = requestChunk(chunkCoords);
-        if (centerChunk->state == Chunk::State::LOADED) return;
+        if (centerChunk->state == Chunk::State::LOADED)
+        {
+            return;
+        }
 
         std::vector<math::Point2Dd> combinedSeeds;
-        combinedSeeds.reserve(9 * config::generation::NUM_POINTS);
+        combinedSeeds.reserve(9L * config::generation::NUM_POINTS);
 
         preloadChunks(chunkCoords);
 
@@ -52,8 +54,8 @@ namespace generation
             extendedDiagram = pipeline::generateFromPoints(relaxedPoints);
         }
 
-        size_t startIndex = 4*config::generation::NUM_POINTS;
-        size_t endIndex = 5*config::generation::NUM_POINTS;
+        size_t startIndex = 4L*config::generation::NUM_POINTS;
+        size_t endIndex = 5L*config::generation::NUM_POINTS;
         centerChunk->voronoiDiagram = extendedDiagram.extractVoronoiSubset(startIndex, endIndex);
         // centerChunk->preloadedSeeds.clear();
         centerChunk->state = Chunk::State::LOADED;
@@ -73,23 +75,32 @@ namespace generation
 
     std::shared_ptr<Chunk> ChunkManager::getChunk(math::Point2Di chunkCoords) const
     {
-        uint64_t key = hashChunk(chunkCoords);
+        const uint64_t key = hashChunk(chunkCoords);
         auto it = chunks.find(key);
-        if (it != chunks.end()) return it->second;
+        if (it != chunks.end())
+        {
+            return it->second;
+        }
         return nullptr;
     }
 
     std::shared_ptr<Chunk> ChunkManager::requestChunk(math::Point2Di chunkCoords)
     {
         auto chunk = getChunk(chunkCoords);
-        if (chunk == nullptr) chunk = addChunk(chunkCoords);
+        if (chunk == nullptr)
+        {
+            chunk = addChunk(chunkCoords);
+        }
         return chunk;
     }
 
     void ChunkManager::preloadChunk(math::Point2Di chunkCoords)
     {
         auto chunk = requestChunk(chunkCoords);
-        if (chunk->state != Chunk::State::UNLOADED) return;
+        if (chunk->state != Chunk::State::UNLOADED)
+        {
+            return;
+        }
 
         chunk->preloadedSeeds = pipeline::samplePoints(
             hashChunk(chunkCoords),
@@ -126,8 +137,8 @@ namespace generation
     uint64_t ChunkManager::hashChunk(math::Point2Di chunkCoords) const
     {
         // cast to uint32_t first to drop the sign-extension behavior
-        uint32_t ux = static_cast<uint32_t>(chunkCoords.x);
-        uint32_t uy = static_cast<uint32_t>(chunkCoords.y);
+        auto ux = static_cast<uint32_t>(chunkCoords.x);
+        auto uy = static_cast<uint32_t>(chunkCoords.y);
 
         uint64_t seed = (static_cast<uint64_t>(ux) << 32) | uy;
         seed ^= m_worldSeed;

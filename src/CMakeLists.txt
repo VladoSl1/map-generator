@@ -3,7 +3,9 @@ add_library(map_gen_lib STATIC)
 target_sources(map_gen_lib
     PRIVATE
         core/config.hpp
+
         core/utils/random.hpp
+
         core/utils/debug.hpp
 
         core/math/geometry.hpp

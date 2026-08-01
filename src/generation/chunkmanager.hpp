@@ -13,7 +13,7 @@ namespace generation
 {
     struct Chunk
     {
-        enum class State
+        enum class State : uint8_t
         {
             UNLOADED,
             PRELOADED,
@@ -27,7 +27,7 @@ namespace generation
         pipeline::VoronoiDiagram voronoiDiagram; //TODO: consider using pointer to seeds in voronoiDiagram to avoid copying seeds when loading chunks
         State state = State::UNLOADED;
 
-        Chunk(math::Point2Di chunkCoords);
+        explicit Chunk(math::Point2Di chunkCoords);
 
         static math::AABB getBounds(math::Point2Di chunkCoords);
     };
@@ -35,7 +35,7 @@ namespace generation
     class ChunkManager
     {
     public:
-        ChunkManager(int worldSeed)
+        explicit ChunkManager(int worldSeed)
             : m_worldSeed(worldSeed)
         {
             preloadChunks({0, 0});

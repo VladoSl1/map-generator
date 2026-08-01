@@ -19,12 +19,12 @@ namespace config
         inline constexpr int INSIDE_PADDING = 15;
         inline constexpr int CHUNK_WIDTH = 500;
         inline constexpr int CHUNK_HEIGHT = 500;
-        inline constexpr int RELAXATION_ITERATIONS = 2; // TODO:make const
+        inline constexpr int RELAXATION_ITERATIONS = 3; // TODO:make const
     }
 
     namespace renderer
     {
-        inline constexpr int POINT_RADIUS = 1;
+        inline constexpr float POINT_RADIUS = 1;
         inline constexpr float DEFAULT_CAMERA_ZOOM = 1.0f;
         inline constexpr float CAMERA_ZOOM_STEP = 0.125f;
         inline constexpr math::Interval<float> CAMERA_ZOOM_RANGE{0.1f, 10.0f};

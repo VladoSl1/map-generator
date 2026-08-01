@@ -10,7 +10,7 @@ namespace math
         Interval<double> x_bounds;
         Interval<double> y_bounds;
 
-        inline constexpr bool contains(const Point2Dd& p) const
+        constexpr bool contains(const Point2Dd& p) const
         {
             return x_bounds.contains(p.x) && y_bounds.contains(p.y);
         }

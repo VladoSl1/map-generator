@@ -1,10 +1,10 @@
 #include "pipeline.hpp"
 
-#include "core/math/point2d.hpp"
-
+#include "generation/pipeline/voronoi_diagram.hpp"
 #include "generation/pipeline/delaunay_triangulation.hpp"
 
-#include "core/utils/debug.hpp"
+#include "core/math/point2d.hpp"
+
 #include <vector>
 
 

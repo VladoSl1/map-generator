@@ -1,4 +1,3 @@
----
 Checks: >
   -*,
   bugprone-*,
@@ -7,20 +6,23 @@ Checks: >
   performance-*,
   readability-*,
   misc-*,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-magic-numbers,
   -modernize-use-trailing-return-type,
-  -modernize-use-nodiscard
+  -modernize-use-nodiscard,
+  -readability-identifier-length,
+  -modernize-use-designated-initializers
 
 HeaderFilterRegex: '^(?!.*(external|_deps)).*'
 FormatStyle: none
 
 CheckOptions:
-  # General modern C++ options
   - key:             modernize-use-auto.MinTypeNameLength
     value:           '5'
   - key:             modernize-pass-by-value.IncludeStyle
     value:           'llvm'
-...
+  - key:             readability-uppercase-literal-suffix.NewSuffixes
+    value:           'L;LL;U;f'

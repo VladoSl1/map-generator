@@ -1,10 +1,15 @@
 #include "renderer.hpp"
 
-#include <vector>
+#include "raylib_adapters.hpp"
+
+#include "generation/chunkmanager.hpp"
 
 #include "core/config.hpp"
+#include "core/math/point2d.hpp"
+#include "core/math/topology.hpp"
 
-#include "raylib_adapters.hpp"
+#include <vector>
+
 
 namespace renderer
 {
@@ -48,12 +53,12 @@ namespace renderer
 
         for (const auto& chunk : chunks)
         {
-            float startX = chunk->bounds.x_bounds.min;
-            float startY = chunk->bounds.y_bounds.min;
-            float width = chunk->bounds.x_bounds.length();
-            float height = chunk->bounds.y_bounds.length();
+            const auto startX = static_cast<float>(chunk->bounds.x_bounds.min);
+            const auto startY = static_cast<float>(chunk->bounds.y_bounds.min);
+            const auto width = static_cast<float>(chunk->bounds.x_bounds.length());
+            const auto height = static_cast<float>(chunk->bounds.y_bounds.length());
 
-            Rectangle chunkRect{ startX, startY, width, height };
+            const Rectangle chunkRect{ startX, startY, width, height };
 
             // Draw the chunk border (2 pixels thick, gray color)
             DrawRectangleLinesEx(chunkRect, 2.0f, DARKGRAY);
