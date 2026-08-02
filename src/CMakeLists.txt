@@ -53,6 +53,7 @@ target_link_libraries(map_gen_lib
     PUBLIC
         raylib
         Delaunator
+        FastNoise2
 )
 
 add_executable(realistic_map_generator
