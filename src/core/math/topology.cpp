@@ -1,6 +1,10 @@
 #include "topology.hpp"
 
+#include <algorithm>
+#include <array>
 #include <cassert>
+#include <cstddef>
+
 
 namespace math
 {
@@ -19,7 +23,7 @@ namespace math
         );
 
         // calculate how many indices were written to the buffer
-        size_t sharedCount = std::distance(shared_buffer.begin(), result.out);
+        const size_t sharedCount = std::distance(shared_buffer.begin(), result.out);
 
         return sharedCount == 2;
     }

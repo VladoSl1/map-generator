@@ -14,6 +14,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-use-nodiscard,
   -readability-identifier-length,
+  -readability-math-missing-parentheses
   -modernize-use-designated-initializers
 
 HeaderFilterRegex: '^(?!.*(external|_deps)).*'

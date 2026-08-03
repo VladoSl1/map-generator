@@ -2,6 +2,8 @@
 
 #include "point2d.hpp"
 
+#include <optional>
+
 namespace math
 {
     /* algorithm: https://en.wikipedia.org/wiki/Circumcircle#Circumcenter_coordinates */

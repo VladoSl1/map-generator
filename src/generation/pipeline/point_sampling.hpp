@@ -3,6 +3,7 @@
 #include "core/math/point2d.hpp"
 #include "core/math/aabb.hpp"
 
+#include <cstdint>
 #include <vector>
 
 namespace generation::pipeline

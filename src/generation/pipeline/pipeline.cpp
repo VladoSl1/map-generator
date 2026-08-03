@@ -5,6 +5,7 @@
 
 #include "core/math/point2d.hpp"
 
+#include <cstdint>
 #include <vector>
 
 

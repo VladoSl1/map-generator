@@ -1,6 +1,10 @@
 #include "point_sampling.hpp"
 
+#include "core/math/aabb.hpp"
+#include "core/math/interval.hpp"
 #include "core/utils/random.hpp"
+
+#include <cstdint>
 
 
 namespace generation::pipeline
@@ -8,8 +12,8 @@ namespace generation::pipeline
     std::vector<math::Point2Dd> samplePoints(uint64_t seed, math::AABB bounds, int numPoints)
     {
         utils::RngEngine rngEngine(seed);
-        math::Interval<double> widthInterval(bounds.x_bounds.min, bounds.x_bounds.max);
-        math::Interval<double> heightInterval(bounds.y_bounds.min, bounds.y_bounds.max);
+        const math::Interval<double> widthInterval(bounds.x_bounds.min, bounds.x_bounds.max);
+        const math::Interval<double> heightInterval(bounds.y_bounds.min, bounds.y_bounds.max);
 
         std::vector<math::Point2Dd> points;
         points.reserve(numPoints);
