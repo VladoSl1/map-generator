@@ -20,5 +20,8 @@ namespace renderer
                      const std::vector<math::EdgeI>& edges,
                      Color color);
 
+    void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
+                        Color color);
+
     void renderChunkGrid(const generation::ChunkManager& chunkManager);
 }

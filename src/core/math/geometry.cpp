@@ -3,8 +3,10 @@
 #include "constants.hpp"
 #include "point2d.hpp"
 
+#include <cassert>
 #include <cmath>
 #include <optional>
+#include <vector>
 
 namespace math
 {
@@ -25,7 +27,29 @@ namespace math
                      (C.x * C.x + C.y * C.y) * (B.x - A.x)) / D;
 
         return std::optional<Point2Dd>({Ux, Uy});
-
     }
+
+    void orderPolygonClockwise(std::vector<Point2Dd> points, PolygonI& polygon)
+    {
+        auto& indices = polygon.indices;
+        assert(indices.size() >= 3 && "Polygon must have at least 3 vertices to determine orientation.");
+
+        double signedArea = 0.0;
+        for (size_t j = 0; j < indices.size(); ++j)
+        {
+            const math::Point2Dd& v1 = points[indices[j]];
+            const math::Point2Dd& v2 = points[indices[(j + 1) % indices.size()]];
+
+            signedArea += (v1.x * v2.y - v2.x * v1.y);
+        }
+
+        // If the signed area is negative, the polygon is Clockwise.
+        // Reverse the indices to make it Counter-Clockwise.
+        if (signedArea > 0.0)
+        {
+            std::ranges::reverse(indices.begin(), indices.end());
+        }
+    }
+
 }
 

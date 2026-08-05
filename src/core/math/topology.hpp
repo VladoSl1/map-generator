@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+
 namespace math
 {
     template <typename Container>
@@ -36,6 +37,10 @@ namespace math
 
     bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
+    PolygonI getIndicesPolygon(const std::vector<EdgeI>& edges,
+                               const PolygonI& edgePolygon);
+
+    /* Converts e.g. triangle indices to edges. Edge elements are sorted */
     template<size_t N>
     std::array<EdgeI, N> convertToEdges(const IndexPrimitive<N>& primitive)
     {

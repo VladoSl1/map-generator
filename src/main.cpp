@@ -78,6 +78,7 @@ int main()
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
+                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
                     if (voronoiDiagram.seeds.size() > 10)
                     {
@@ -93,10 +94,10 @@ int main()
                         // renderer::renderEdges(voronoiDiagram.vertices, highlightedEdges, ORANGE);
                     }
 
-                    log("Chunk coords: ", chunk->chunkCoords.x, ", ", chunk->chunkCoords.y);
+                    // log("Chunk coords: ", chunk->chunkCoords.x, ", ", chunk->chunkCoords.y);
                 }
 
-                // renderer::renderChunkGrid(*chunkManager);
+                renderer::renderChunkGrid(*chunkManager);
             }
             EndMode2D(); // End Camera Transformations
 

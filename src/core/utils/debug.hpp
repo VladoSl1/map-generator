@@ -5,7 +5,7 @@
 #include <string_view>
 
 
-// #define DEBUG_FLAG
+#define DEBUG_FLAG
 
 template <typename... Args>
 void log(Args&&... args) {

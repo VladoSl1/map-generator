@@ -1,11 +1,10 @@
 #include "voronoi_diagram.hpp"
-#include "core/config.hpp"
+
 #include "core/math/geometry.hpp"
 #include "core/math/point2d.hpp"
 #include "core/math/sorting.hpp"
-#include "core/utils/debug.hpp"
 
-#include <climits>
+#include <cassert>
 
 namespace generation::pipeline
 {
@@ -34,7 +33,11 @@ namespace generation::pipeline
      * In Voronoi diagram, there is edge between two vertices, iff in Delaunay triangulation
      * the two triangles corresponding to these verticies share an edge. Therefore, it makes
      * sense to process the graph edge-wise. For efficiency, we use radix sort to process the
-     * edge in O(n) time.
+     * edges in O(n) time.
+     * We are constructing the Voronoi diagram from finite set of points, therefore some of the
+     * Voronoi polygons will be open (external). We ignore external edges and keep track which
+     * polygons are open. This is useful for relaxation.
+     *
      * It is possible to directly calculate the Voronoi edges from points without Delaunay
      * triangles, but this approach is much more complicated.
      * */
@@ -46,7 +49,7 @@ namespace generation::pipeline
         openPolygons.assign(triangleSeeds.size(), false);
 
         seeds = triangleSeeds; //TODO: consider move semantics
-        vertices = findVoronoiVertices(seeds, triangleIndices);
+        vertices = calculateVoronoiVertices(seeds, triangleIndices);
 
         std::vector<EdgeWithOwner> triangleEdgesWithId;
         triangleEdgesWithId.reserve(triangleIndices.size() * 3);
@@ -89,61 +92,100 @@ namespace generation::pipeline
                 i += 1;
             }
         }
+
+        convertEdgePolygonsToVertexPolygons();
+    }
+
+    void VoronoiDiagram::convertEdgePolygonsToVertexPolygons()
+    {
+        for (size_t p = 0; p < polygons.size(); ++p)
+        {
+            if (openPolygons[p])
+            {
+                // TODO: right now we are just collecting all vertices of the edges, but they are not ordered
+                std::vector<size_t> vertIndices;
+                for (size_t edgeIdx : polygons[p].indices)
+                {
+                    const auto& edge = edges[edgeIdx];
+                    if (std::ranges::find(vertIndices.begin(), vertIndices.end(), edge[0]) == vertIndices.end())
+                    {
+                        vertIndices.push_back(edge[0]);
+                    }
+                    if (std::ranges::find(vertIndices.begin(), vertIndices.end(), edge[1]) == vertIndices.end())
+                    {
+                        vertIndices.push_back(edge[1]);
+                    }
+                }
+                polygons[p].indices = std::move(vertIndices);
+            }
+            else
+            {
+                polygons[p] = math::getIndicesPolygon(edges, polygons[p]);
+                math::orderPolygonClockwise(vertices, polygons[p]);
+            }
+        }
     }
 
     bool VoronoiDiagram::isPolygonClosed(size_t polygonIndex) const
     {
-        if (polygonIndex >= openPolygons.size()) return false;
+        if (polygonIndex >= openPolygons.size())
+        {
+            return false;
+        }
         return !openPolygons[polygonIndex];
     }
 
-
+    /* Purpose of this function is to exctract subset of Voronoi diagram corresponding to a subset of seeds.
+     * To every seed corresponds a polygon, and to every polygon corresponds a set of vertices.
+     * This function maps the vertices of the original Voronoi diagram to the new subset Voronoi diagram,
+     * and updates the edges and polygons accordingly.
+     */
     VoronoiDiagram VoronoiDiagram::extractVoronoiSubset(size_t seedStartIndex, size_t seedEndIndex) const
     {
         VoronoiDiagram subsetVoronoi;
-        size_t numSeeds = seedEndIndex - seedStartIndex;
+        const size_t numSeeds = seedEndIndex - seedStartIndex;
 
         subsetVoronoi.seeds = std::vector<math::Point2Dd>(seeds.begin() + seedStartIndex,
                                                           seeds.begin() + seedEndIndex);
+
+        subsetVoronoi.vertices.reserve(vertices.size()); // there may be vertices corresponding to other seeds, so this is just lower bound
 
         subsetVoronoi.polygons.resize(numSeeds);
         subsetVoronoi.openPolygons.resize(numSeeds);
 
         constexpr size_t UNMAPPED = std::numeric_limits<size_t>::max();
 
-        std::vector<size_t> edgeMap(edges.size(), UNMAPPED);
         std::vector<size_t> vertexMap(vertices.size(), UNMAPPED);
 
         for (size_t i = seedStartIndex; i < seedEndIndex; ++i)
         {
             size_t localIndex = i - seedStartIndex;
+            // subsetVoronoi.openPolygons[localIndex] = false;
             subsetVoronoi.openPolygons[localIndex] = openPolygons[i];
 
-            for (size_t oldEdgeIdx : polygons[i].indices)
+            for (size_t oldVertIdx : polygons[i].indices)
             {
-                // if the edge was not already processed
-                if (edgeMap[oldEdgeIdx] == UNMAPPED)
+                // If the vertex hasn't been added to the subset yet, map and push it
+                if (vertexMap[oldVertIdx] == UNMAPPED)
                 {
-                    edgeMap[oldEdgeIdx] = subsetVoronoi.edges.size(); // "push" the edge to the end
-
-                    math::EdgeI oldEdge = edges[oldEdgeIdx];
-                    math::EdgeI newEdge;
-
-                    // Map over vertices for this edge
-                    for (int v = 0; v < 2; ++v)
-                    {
-                        size_t oldVertIdx = oldEdge[v];
-                        if (vertexMap[oldVertIdx] == UNMAPPED)
-                        {
-                            vertexMap[oldVertIdx] = subsetVoronoi.vertices.size();
-                            subsetVoronoi.vertices.push_back(vertices[oldVertIdx]);
-                        }
-                        newEdge[v] = vertexMap[oldVertIdx];
-                    }
-                    subsetVoronoi.edges.push_back(newEdge);
+                    vertexMap[oldVertIdx] = subsetVoronoi.vertices.size();
+                    subsetVoronoi.vertices.push_back(vertices[oldVertIdx]);
                 }
 
-                subsetVoronoi.polygons[localIndex].indices.push_back(edgeMap[oldEdgeIdx]);
+                // Add the newly mapped vertex index to the local polygon
+                subsetVoronoi.polygons[localIndex].indices.push_back(vertexMap[oldVertIdx]);
+            }
+        }
+
+        for (const auto& edge : edges)
+        {
+            size_t newV1 = vertexMap[edge[0]];
+            size_t newV2 = vertexMap[edge[1]];
+
+            // retain only edges where both vertices exist in this subset
+            if (newV1 != UNMAPPED && newV2 != UNMAPPED)
+            {
+                subsetVoronoi.edges.push_back(math::EdgeI{{newV1, newV2}});
             }
         }
 
@@ -152,7 +194,7 @@ namespace generation::pipeline
 
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
-    std::vector<math::Point2Dd> findVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
+    std::vector<math::Point2Dd> calculateVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices)
     {
         std::vector<math::Point2Dd> voronoiVertices;
@@ -162,13 +204,17 @@ namespace generation::pipeline
         {
             auto [a, b, c] = triangle.indices;
             auto circumcenter = math::calculateCircumcenter(trianglePoints[a], trianglePoints[b], trianglePoints[c]);
-            if (!circumcenter.has_value()) continue;  // skip degenerate triangles
+            if (!circumcenter.has_value())   // skip degenerate triangles
+            {
+                continue;
+            }
             voronoiVertices.push_back(circumcenter.value());
         }
 
         return voronoiVertices;
     }
 
+    /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm */
     std::vector<math::Point2Dd> relaxVoronoiDiagram(const VoronoiDiagram& voronoiDiagram)
     {
         std::vector<math::Point2Dd> newSeeds(voronoiDiagram.seeds.size());
@@ -183,14 +229,12 @@ namespace generation::pipeline
 
             math::Point2Dd centroid{0, 0};
 
-            for (const auto& edgeIndex : voronoiDiagram.polygons[i].indices)
+            for (const auto& vertexIndex : voronoiDiagram.polygons[i].indices)
             {
-                const auto& edge = voronoiDiagram.edges[edgeIndex];
-                centroid += voronoiDiagram.vertices[edge[0]].cast<double>();
-                centroid += voronoiDiagram.vertices[edge[1]].cast<double>();
+                centroid += voronoiDiagram.vertices[vertexIndex].cast<double>();
             }
 
-            centroid /= static_cast<double>(voronoiDiagram.polygons[i].indices.size() * 2);
+            centroid /= static_cast<double>(voronoiDiagram.polygons[i].indices.size());
             newSeeds[i] = centroid;
         }
 

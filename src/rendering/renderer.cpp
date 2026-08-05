@@ -8,6 +8,8 @@
 #include "core/math/point2d.hpp"
 #include "core/math/topology.hpp"
 
+#include "core/utils/debug.hpp"
+
 #include <vector>
 
 
@@ -46,6 +48,42 @@ namespace renderer
                       color);
         }
     }
+
+    /* Expects polygons to be clockwise ordered */
+    void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
+                        Color color)
+    {
+        for (size_t i = 0; i < diagram.polygons.size(); ++i)
+        {
+            // TODO: this is producing incorrect results, need to investigate why
+            if (!diagram.isPolygonClosed(i))
+            {
+                log("Skipping open polygon at index ", i, " with ", diagram.polygons[i].indices.size(), " edges.");
+                continue;
+            }
+
+            const auto& indices = diagram.polygons[i].indices;
+            if (indices.size() < 3)
+            {
+                log("Skipping small polygon at index ", i, " with ", diagram.polygons[i].indices.size(), " edges.");
+                continue;
+            }
+
+            std::vector<Vector2> fanPoints;
+            fanPoints.reserve(indices.size());
+            for (size_t idx : indices)
+            {
+                fanPoints.push_back(toRaylib(diagram.vertices[idx]));
+            }
+
+            DrawTriangleFan(fanPoints.data(), fanPoints.size(), color);
+
+            fanPoints.push_back(fanPoints.front());
+            DrawLineStrip(fanPoints.data(), fanPoints.size(), BLACK);
+        }
+
+    }
+
 
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {
