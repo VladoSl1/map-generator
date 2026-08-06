@@ -4,6 +4,9 @@
 #include "core/math/point2d.hpp"
 #include "core/math/sorting.hpp"
 
+// TODO: remove this include, it is only used for debugging
+#include "delaunay_triangulation.hpp"
+
 #include <cassert>
 
 namespace generation::pipeline
@@ -17,6 +20,12 @@ namespace generation::pipeline
         openPolygons.clear();
     }
 
+    void DynamicVoronoiDiagram::clear()
+    {
+        VoronoiDiagram::clear();
+        edges.clear();
+        delaunayTriangles.clear();
+    }
 
     void DynamicVoronoiDiagram::assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex)
     {
@@ -51,16 +60,17 @@ namespace generation::pipeline
         openPolygons.assign(triangleSeeds.size(), false);
 
         seeds = triangleSeeds; //TODO: consider move semantics
-        vertices = calculateVoronoiVertices(seeds, triangleIndices);
+        delaunayTriangles = triangleIndices; //TODO: consider move semantics
+        vertices = calculateVoronoiVertices(seeds, delaunayTriangles);
 
         std::vector<EdgeWithOwner> triangleEdgesWithId;
-        triangleEdgesWithId.reserve(triangleIndices.size() * 3);
+        triangleEdgesWithId.reserve(delaunayTriangles.size() * 3);
 
-        for (size_t i = 0; i < triangleIndices.size(); ++i)
+        for (size_t i = 0; i < delaunayTriangles.size(); ++i)
         {
             // array of edges of the triangle, each edge is represented
             // by two indices of triangleSeeds
-            auto triEdges = math::convertToEdges(triangleIndices[i]);
+            auto triEdges = math::convertToEdges(delaunayTriangles[i]);
             for (size_t j = 0; j < triEdges.size(); ++j)
             {
                 triangleEdgesWithId.push_back({ triEdges[j], i });
@@ -206,10 +216,7 @@ namespace generation::pipeline
         return std::move(subsetVoronoi);
     }
 
-    /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
-     * Difference from the original algorithm is that we are not recalculating the Voronoi diagram from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.
-     * */
-    void DynamicVoronoiDiagram::relax()
+    void DynamicVoronoiDiagram::relax(bool fixedTopology)
     {
         std::vector<math::Point2Dd> newSeeds = seeds;
 
@@ -228,20 +235,31 @@ namespace generation::pipeline
 
             if (!polygons[i].indices.empty())
             {
-                centroid /= static_cast<double>(polygons[i].size());
-                newSeeds[i] = centroid;
+                newSeeds[i] = math::calculatePolygonCentroid(vertices, polygons[i]);
             }
         }
 
-        // Apply new seeds and update vertices purely based on retained topology
-        seeds = std::move(newSeeds);
-        calculateVoronoiVertices(seeds, delaunayTriangles);
+        if (fixedTopology)
+        {
+            seeds = std::move(newSeeds);
+            vertices = calculateVoronoiVertices(seeds, delaunayTriangles);
+        }
+        else
+        {
+            auto newTriangles = triangulate(newSeeds);
+            generate(newSeeds, newTriangles);
+        }
     }
+
+
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
     std::vector<math::Point2Dd> calculateVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
                                                      const std::vector<math::TriangleI>& triangleIndices)
     {
+        assert(!trianglePoints.empty() && "Triangle points cannot be empty.");
+        assert(!triangleIndices.empty() && "Triangle indices cannot be empty.");
+
         std::vector<math::Point2Dd> voronoiVertices;
         voronoiVertices.reserve(triangleIndices.size());
 
@@ -260,6 +278,6 @@ namespace generation::pipeline
             }
         }
 
-        return voronoiVertices;
+        return std::move(voronoiVertices);
     }
 }

@@ -46,5 +46,35 @@ namespace math
         return signedArea / 2.0;
     }
 
+    Point2Dd calculatePolygonCentroid(const std::vector<Point2Dd>& points, const PolygonI& polygon)
+    {
+        const auto& indices = polygon.indices;
+        assert(indices.size() >= 3 && "Polygon must have at least 3 vertices to calculate centroid.");
+
+        double signedArea = 0.0;
+        double cx = 0.0;
+        double cy = 0.0;
+
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+            const Point2Dd& v1 = points[indices[i]];
+            const Point2Dd& v2 = points[indices[(i + 1) % indices.size()]];
+
+            double crossProduct = (v1.x * v2.y - v2.x * v1.y);
+            signedArea += crossProduct;
+            cx += (v1.x + v2.x) * crossProduct;
+            cy += (v1.y + v2.y) * crossProduct;
+        }
+
+        signedArea /= 2.0;
+
+        cx /= (6.0 * signedArea);
+        cy /= (6.0 * signedArea);
+
+        return {cx, cy};
+
+
+    }
+
 }
 

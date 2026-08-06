@@ -14,7 +14,7 @@ namespace generation::pipeline
         std::vector<math::PolygonI> polygons;  // Polygon elements are indices of vertices
         std::vector<bool> openPolygons;        // True if polygon is open to infinity
 
-        void clear();
+        virtual void clear();
         bool isPolygonClosed(size_t polygonIndex) const;
         VoronoiDiagram extractVoronoiSubset(size_t seedStartIndex, size_t seedEndIndex) const;
     };
@@ -27,10 +27,11 @@ namespace generation::pipeline
         void generate(std::vector<math::Point2Dd>& triangleSeeds,
                       const std::vector<math::TriangleI>& triangleIndices);
 
-        /* The order of points stays the same, meaning structure from original voronoi diagram can be reused
-         * Fixed-topology Lloyd's relaxation iteration
+        /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
+         * fixedTopology: Difference from the original algorithm is that we are not recalculating the Voronoi diagram from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.
          * */
-        void relax();
+        void relax(bool fixedTopology = false);
+        void clear() override;
 
     private:
         void assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex);

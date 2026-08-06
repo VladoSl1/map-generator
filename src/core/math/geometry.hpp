@@ -13,4 +13,7 @@ namespace math
 
     /* https://en.wikipedia.org/wiki/Shoelace_formula */
     double calculateSignedPolygonArea(const std::vector<Point2Dd>& points, const PolygonI& polygon);
+
+    /* https://en.wikipedia.org/wiki/Centroid#By_geometric_decomposition */
+    Point2Dd calculatePolygonCentroid(const std::vector<Point2Dd>& points, const PolygonI& polygon);
 }

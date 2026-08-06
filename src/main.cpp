@@ -47,6 +47,7 @@ int main()
 
         chunks = chunkManager->listAllChunks();
         log("Chunks loaded: " + std::to_string(chunks.size()));
+        log("Number of relaxation iterations: " + std::to_string(config::generation::RELAXATION_ITERATIONS));
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
@@ -58,11 +59,14 @@ int main()
             // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
             // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
             //
-            // config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
+            config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
             //
-            // chunkManager = generation::ChunkManager(42);
-            // chunks = chunkManager.listAllChunks();
-            // voronoiDiagram = chunkManager.getChunk({0, 0})->voronoiDiagram;
+            chunkManager = std::make_shared<generation::ChunkManager>(42);
+
+            chunks = chunkManager->listAllChunks();
+            voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
+
+            chunkStreamer = renderer::ChunkStreamer(chunkManager);
         }
 
         BeginDrawing();
@@ -75,10 +79,11 @@ int main()
                 for (const auto& chunk : chunks)
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
-                    // renderer::renderPoints(voronoiDiagram.seeds, RED);
+                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+
+                    renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
-                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
                     if (voronoiDiagram.seeds.size() > 10)
                     {
