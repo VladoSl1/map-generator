@@ -79,13 +79,11 @@ namespace renderer
             fanPoints.push_back(fanPoints.front());
             DrawLineStrip(fanPoints.data(), fanPoints.size(), BLACK);
         }
-
     }
-
 
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {
-        auto chunks = chunkManager.listAllChunks();
+        const auto chunks = chunkManager.listAllChunks();
 
         for (const auto& chunk : chunks)
         {
