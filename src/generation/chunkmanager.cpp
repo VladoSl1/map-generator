@@ -4,6 +4,7 @@
 #include "generation/pipeline/pipeline.hpp"
 #include "generation/pipeline/point_sampling.hpp"
 #include "core/utils/debug.hpp"
+#include "generation/pipeline/voronoi_diagram.hpp"
 #include <cstdint>
 
 namespace generation
@@ -46,12 +47,11 @@ namespace generation
             }
         }
 
-        pipeline::VoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
+        pipeline::DynamicVoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
 
         for (int i = 0; i < config::generation::RELAXATION_ITERATIONS; ++i)
         {
-            std::vector<math::Point2Dd> relaxedPoints = pipeline::relaxVoronoiDiagram(extendedDiagram);
-            extendedDiagram = pipeline::generateFromPoints(relaxedPoints);
+            extendedDiagram.relax();
         }
 
         size_t startIndex = 4L*config::generation::NUM_POINTS;

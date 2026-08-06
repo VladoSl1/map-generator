@@ -20,6 +20,7 @@ namespace renderer
                      const std::vector<math::EdgeI>& edges,
                      Color color);
 
+    /* Expects polygons to be clockwise ordered */
     void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
                         Color color);
 

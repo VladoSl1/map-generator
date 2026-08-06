@@ -77,7 +77,7 @@ int main()
                     voronoiDiagram = chunk->voronoiDiagram;
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
-                    renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
+                    // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
                      renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
                     if (voronoiDiagram.seeds.size() > 10)

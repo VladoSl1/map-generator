@@ -12,5 +12,5 @@ namespace math
     std::optional<Point2Dd> calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C);
 
     /* https://en.wikipedia.org/wiki/Shoelace_formula */
-    void orderPolygonClockwise(std::vector<Point2Dd> points, PolygonI& polygon);
+    double calculateSignedPolygonArea(const std::vector<Point2Dd>& points, const PolygonI& polygon);
 }

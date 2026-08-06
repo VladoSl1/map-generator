@@ -11,11 +11,11 @@
 
 namespace generation::pipeline
 {
-    VoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> seedPoints)
+    DynamicVoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> seedPoints)
     {
         auto triangles = pipeline::triangulate(seedPoints);
 
-        VoronoiDiagram voronoiDiagram;
+        DynamicVoronoiDiagram voronoiDiagram;
 
         voronoiDiagram.generate(seedPoints, triangles);
 

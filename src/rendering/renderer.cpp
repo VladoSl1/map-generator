@@ -49,13 +49,11 @@ namespace renderer
         }
     }
 
-    /* Expects polygons to be clockwise ordered */
     void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
                         Color color)
     {
         for (size_t i = 0; i < diagram.polygons.size(); ++i)
         {
-            // TODO: this is producing incorrect results, need to investigate why
             if (!diagram.isPolygonClosed(i))
             {
                 log("Skipping open polygon at index ", i, " with ", diagram.polygons[i].indices.size(), " edges.");

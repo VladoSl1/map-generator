@@ -71,6 +71,12 @@ namespace math
         return point;
     }
 
+    template<typename T>
+    inline Point2D<T> operator/(Point2D<T> point, T scalar) {
+        point /= scalar;
+        return point;
+    }
+
 
     using Point2Di = Point2D<int>;
     using Point2Df = Point2D<float>;

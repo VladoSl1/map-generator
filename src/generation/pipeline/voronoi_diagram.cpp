@@ -8,19 +8,21 @@
 
 namespace generation::pipeline
 {
-    void VoronoiDiagram::assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex)
-    {
-        polygons[polygonIndex].indices.push_back(edgeIndex);
-    }
 
     void VoronoiDiagram::clear()
     {
         seeds.clear();
         vertices.clear();
-        edges.clear();
         polygons.clear();
         openPolygons.clear();
     }
+
+
+    void DynamicVoronoiDiagram::assignEdgeToPolygon(size_t edgeIndex, size_t polygonIndex)
+    {
+        polygons[polygonIndex].indices.push_back(edgeIndex);
+    }
+
 
     struct EdgeWithOwner
     {
@@ -41,7 +43,7 @@ namespace generation::pipeline
      * It is possible to directly calculate the Voronoi edges from points without Delaunay
      * triangles, but this approach is much more complicated.
      * */
-    void VoronoiDiagram::generate(std::vector<math::Point2Dd>& triangleSeeds,
+    void DynamicVoronoiDiagram::generate(std::vector<math::Point2Dd>& triangleSeeds,
                                   const std::vector<math::TriangleI>& triangleIndices)
     {
         clear();
@@ -96,7 +98,11 @@ namespace generation::pipeline
         convertEdgePolygonsToVertexPolygons();
     }
 
-    void VoronoiDiagram::convertEdgePolygonsToVertexPolygons()
+    /*
+     *
+     *
+     */
+    void DynamicVoronoiDiagram::convertEdgePolygonsToVertexPolygons()
     {
         for (size_t p = 0; p < polygons.size(); ++p)
         {
@@ -121,7 +127,15 @@ namespace generation::pipeline
             else
             {
                 polygons[p] = math::getIndicesPolygon(edges, polygons[p]);
-                math::orderPolygonClockwise(vertices, polygons[p]);
+
+                double signedArea = math::calculateSignedPolygonArea(vertices, polygons[p]);
+
+                // If the signed area is negative, the polygon is Clockwise.
+                // Reverse the indices to make it Counter-Clockwise.
+                if (signedArea > 0.0)
+                {
+                    std::ranges::reverse(polygons[p].indices.begin(), polygons[p].indices.end());
+                }
             }
         }
     }
@@ -135,7 +149,7 @@ namespace generation::pipeline
         return !openPolygons[polygonIndex];
     }
 
-    /* Purpose of this function is to exctract subset of Voronoi diagram corresponding to a subset of seeds.
+    /* This function is exctracts subset of Voronoi diagram corresponding to a subset of seeds.
      * To every seed corresponds a polygon, and to every polygon corresponds a set of vertices.
      * This function maps the vertices of the original Voronoi diagram to the new subset Voronoi diagram,
      * and updates the edges and polygons accordingly.
@@ -177,21 +191,52 @@ namespace generation::pipeline
             }
         }
 
-        for (const auto& edge : edges)
-        {
-            size_t newV1 = vertexMap[edge[0]];
-            size_t newV2 = vertexMap[edge[1]];
-
-            // retain only edges where both vertices exist in this subset
-            if (newV1 != UNMAPPED && newV2 != UNMAPPED)
-            {
-                subsetVoronoi.edges.push_back(math::EdgeI{{newV1, newV2}});
-            }
-        }
+        // for (const auto& edge : edges)
+        // {
+        //     size_t newV1 = vertexMap[edge[0]];
+        //     size_t newV2 = vertexMap[edge[1]];
+        //
+        //     // retain only edges where both vertices exist in this subset
+        //     if (newV1 != UNMAPPED && newV2 != UNMAPPED)
+        //     {
+        //         subsetVoronoi.edges.push_back(math::EdgeI{{newV1, newV2}});
+        //     }
+        // }
 
         return std::move(subsetVoronoi);
     }
 
+    /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
+     * Difference from the original algorithm is that we are not recalculating the Voronoi diagram from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.
+     * */
+    void DynamicVoronoiDiagram::relax()
+    {
+        std::vector<math::Point2Dd> newSeeds = seeds;
+
+        for (size_t i = 0; i < polygons.size(); ++i)
+        {
+            if (!isPolygonClosed(i))
+            {
+                continue;
+            }
+
+            math::Point2Dd centroid{0, 0};
+            for (const auto& vertexIndex : polygons[i].indices)
+            {
+                centroid += vertices[vertexIndex].cast<double>();
+            }
+
+            if (!polygons[i].indices.empty())
+            {
+                centroid /= static_cast<double>(polygons[i].size());
+                newSeeds[i] = centroid;
+            }
+        }
+
+        // Apply new seeds and update vertices purely based on retained topology
+        seeds = std::move(newSeeds);
+        calculateVoronoiVertices(seeds, delaunayTriangles);
+    }
 
     /* alg: https://en.wikipedia.org/wiki/Delaunay_triangulation#Relationship_with_the_Voronoi_diagram */
     std::vector<math::Point2Dd> calculateVoronoiVertices(const std::vector<math::Point2Dd>& trianglePoints,
@@ -202,42 +247,19 @@ namespace generation::pipeline
 
         for (const auto& triangle : triangleIndices)
         {
-            auto [a, b, c] = triangle.indices;
-            auto circumcenter = math::calculateCircumcenter(trianglePoints[a], trianglePoints[b], trianglePoints[c]);
-            if (!circumcenter.has_value())   // skip degenerate triangles
+            const auto [a, b, c] = triangle.indices;
+            const auto circumcenter = math::calculateCircumcenter(trianglePoints[a], trianglePoints[b], trianglePoints[c]);
+            if (circumcenter.has_value())
             {
-                continue;
+                voronoiVertices.push_back(circumcenter.value());
             }
-            voronoiVertices.push_back(circumcenter.value());
+            else  // triangle is degenerate, circumcenter is undefined
+            {
+                // Fallback to the centroid of the triangle
+                voronoiVertices.push_back((trianglePoints[a] + trianglePoints[b] + trianglePoints[c]) / 3.0);
+            }
         }
 
         return voronoiVertices;
-    }
-
-    /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm */
-    std::vector<math::Point2Dd> relaxVoronoiDiagram(const VoronoiDiagram& voronoiDiagram)
-    {
-        std::vector<math::Point2Dd> newSeeds(voronoiDiagram.seeds.size());
-
-        for (size_t i = 0; i < voronoiDiagram.polygons.size(); ++i)
-        {
-            if (!voronoiDiagram.isPolygonClosed(i)) // ignore polygons whose edges go to infinity
-            {
-                newSeeds[i] = voronoiDiagram.seeds[i];
-                continue;
-            }
-
-            math::Point2Dd centroid{0, 0};
-
-            for (const auto& vertexIndex : voronoiDiagram.polygons[i].indices)
-            {
-                centroid += voronoiDiagram.vertices[vertexIndex].cast<double>();
-            }
-
-            centroid /= static_cast<double>(voronoiDiagram.polygons[i].indices.size());
-            newSeeds[i] = centroid;
-        }
-
-        return newSeeds;
     }
 }
