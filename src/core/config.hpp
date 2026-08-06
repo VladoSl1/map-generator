@@ -20,6 +20,15 @@ namespace config
         inline constexpr int CHUNK_WIDTH = 500;
         inline constexpr int CHUNK_HEIGHT = 500;
         inline int RELAXATION_ITERATIONS = 0;
+
+        /* Size of one voroni cell in pixels is roughly
+         * CHUNK_WIDTH / SQRT(NUM_POINTS) -> 500 / 14.1 \approx 35 pixels
+         */
+
+        inline constexpr float CONTINENTAL_SCALE = 2000.0f;
+        inline constexpr float EROSION_SCALE = 500.0f;
+        inline constexpr float DETAIL_SCALE = 100.0f;
+        inline constexpr int DETAIL_OCTAVE_COUNT = 5;
     }
 
     namespace renderer
