@@ -15,6 +15,14 @@
 
 namespace renderer
 {
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> 2c8d59f (Fix missing return and do better decomposition)
     void renderPoints(const std::vector<math::Point2Dd>& points, Color color)
     {
         for (const auto& point : points)

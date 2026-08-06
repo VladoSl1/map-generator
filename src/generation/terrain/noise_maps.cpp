@@ -24,13 +24,14 @@ namespace terrain
         noiseMap.reserve(xCoords.size());
 
         rootNode->GenPositionArray2D(noiseMap.data(),
-                                     xCoords.size(),
+                                     static_cast<int>(xCoords.size()),
                                      xCoords.data(),
                                      yCoords.data(),
                                      0.0f,  // these offsets are used for shifting sampling region
                                      0.0f,  // this function expects the x and y coordinates to be in world space, so we don't need to offset them
                                      seed);
 
+        return std::move(noiseMap);
     }
 
     void TerrainNoiseMap::BuildNodeTree()

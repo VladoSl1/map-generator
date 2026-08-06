@@ -15,9 +15,6 @@ namespace terrain
         std::vector<float> getElevationNoiseMap(const std::vector<float>& xCoords,
                                                 const std::vector<float>& yCoords) const;
 
-
-
-
     private:
         int seed;
         FastNoise::SmartNode<> rootNode;
