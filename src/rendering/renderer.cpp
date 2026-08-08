@@ -54,16 +54,10 @@ namespace renderer
     {
         for (size_t i = 0; i < diagram.polygons.size(); ++i)
         {
-            if (!diagram.isPolygonClosed(i))
-            {
-                log("Skipping open polygon at index ", i, " with ", diagram.polygons[i].indices.size(), " edges.");
-                continue;
-            }
-
             const auto& indices = diagram.polygons[i].indices;
-            if (indices.size() < 3)
+
+            if (!diagram.isPolygonClosed(i) || indices.size() < 3)
             {
-                log("Skipping small polygon at index ", i, " with ", diagram.polygons[i].indices.size(), " edges.");
                 continue;
             }
 
@@ -85,28 +79,131 @@ namespace renderer
     {
         switch (biome)
         {
-            case terrain::BiomeType::DEEP_OCEAN:               return { 26, 68, 122, 255 };
-            case terrain::BiomeType::OCEAN:                    return { 66, 161, 204, 255 };
+            case terrain::BiomeType::DEEP_OCEAN:               return { 15, 45, 125, 255 };
+            case terrain::BiomeType::OCEAN:                    return { 35, 105, 200, 255 };
+            case terrain::BiomeType::LAKE:                     return { 60, 160, 240, 255 };
 
-            case terrain::BiomeType::BEACH:                    return { 240, 223, 163, 255 };
+            case terrain::BiomeType::BEACH:                    return { 245, 225, 135, 255 };
 
-            case terrain::BiomeType::SCORCHED:                 return { 71, 59, 58, 255 };
-            case terrain::BiomeType::BARE:                     return { 130, 119, 112, 255 };
-            case terrain::BiomeType::TUNDRA:                   return { 166, 184, 173, 255 };
-            case terrain::BiomeType::SNOW:                     return { 245, 250, 252, 255 };
+            case terrain::BiomeType::SCORCHED:                 return { 85, 55, 45, 255 };
+            case terrain::BiomeType::BARE:                     return { 145, 135, 125, 255 };
+            case terrain::BiomeType::TUNDRA:                   return { 140, 170, 160, 255 };
+            case terrain::BiomeType::SNOW:                     return { 240, 250, 255, 255 };
 
-            case terrain::BiomeType::TEMPERATE_DESERT:         return { 214, 203, 156, 255 };
-            case terrain::BiomeType::SHRUBLAND:                return { 156, 176, 130, 255 };
-            case terrain::BiomeType::TAIGA:                    return { 106, 140, 107, 255 };
+            case terrain::BiomeType::TEMPERATE_DESERT:         return { 225, 190, 130, 255 };
+            case terrain::BiomeType::SHRUBLAND:                return { 145, 185, 115, 255 };
+            case terrain::BiomeType::TAIGA:                    return { 45, 115, 75, 255 };
 
-            case terrain::BiomeType::SUBTROPICAL_DESERT:       return { 224, 194, 137, 255 };
-            case terrain::BiomeType::GRASSLAND:                return { 128, 191, 117, 255 };
-            case terrain::BiomeType::TROPICAL_SEASONAL_FOREST: return { 89, 168, 92, 255 };
-            case terrain::BiomeType::TROPICAL_RAIN_FOREST:     return { 44, 130, 81, 255 };
+            case terrain::BiomeType::SUBTROPICAL_DESERT:       return { 240, 180, 100, 255 };
+            case terrain::BiomeType::GRASSLAND:                return { 100, 200, 85, 255 };
+            case terrain::BiomeType::TROPICAL_SEASONAL_FOREST: return { 65, 160, 55, 255 };
+            case terrain::BiomeType::TROPICAL_RAIN_FOREST:     return { 20, 110, 40, 255 };
 
-            default:                                           return MAGENTA; // Error color
+            default:                                           return MAGENTA;
         }
     }
+
+    static Color getContinuousColor(float elevation, float moisture, float baseTemperature)
+    {
+        auto lerp = [](float a, float b, float t) { return a + t * (b - a); };
+
+        // OCEAN
+        if (elevation < 0.0f)
+        {
+            float depth = std::clamp(-elevation * 2.0f, 0.0f, 1.0f);
+            float currentVariation = moisture * 0.15f;
+            float perceivedDepth = std::clamp(depth + currentVariation, 0.0f, 1.0f);
+
+            float r, g, b;
+
+            if (perceivedDepth < 0.2f)
+            {
+                float t = perceivedDepth / 0.2f;
+                r = lerp(140.0f, 40.0f, t);
+                g = lerp(210.0f, 170.0f, t);
+                b = lerp(230.0f, 210.0f, t);
+            }
+            else
+            {
+                float t = (perceivedDepth - 0.2f) / 0.8f;
+                r = lerp(40.0f, 10.0f, t);
+                g = lerp(170.0f, 25.0f, t);
+                b = lerp(210.0f, 80.0f, t);
+            }
+
+            return {
+                static_cast<unsigned char>(std::clamp(r, 0.0f, 255.0f)),
+                static_cast<unsigned char>(std::clamp(g, 0.0f, 255.0f)),
+                static_cast<unsigned char>(std::clamp(b, 0.0f, 255.0f)),
+                255
+            };
+        }
+
+        // INLAND LAKES
+        // if (moisture > 0.99f)
+        // {
+        //     float lakeDepth = std::clamp((moisture - 0.5f) * 2.0f, 0.0f, 1.0f);
+        //     float r = lerp(60.0f, 20.0f, lakeDepth);
+        //     float g = lerp(180.0f, 120.0f, lakeDepth);
+        //     float b = lerp(240.0f, 200.0f, lakeDepth);
+        //     return { static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 255 };
+        // }
+
+        // LAND
+        float t = std::clamp(elevation, 0.0f, 1.0f);
+
+        if (t > 0.75f)
+        {
+            float highElevationFactor = (t - 0.25f) / 0.75f;
+
+            float tempModifier = baseTemperature * 0.3f * highElevationFactor;
+
+            t = std::clamp(t - tempModifier, 0.0f, 1.0f);
+        }
+
+        float finalR, finalG, finalB;
+
+        if (t < 0.25f)
+        {
+            // Lowlands & Plains: Rich Green to Lighter Green
+            float localT = t / 0.25f;
+            finalR = lerp(34.0f, 90.0f, localT);
+            finalG = lerp(139.0f, 180.0f, localT);
+            finalB = lerp(34.0f, 60.0f, localT);
+        }
+        else if (t < 0.5f)
+        {
+            // Foothills: Lighter Green transitioning to Earthy Brown
+            float localT = (t - 0.25f) / 0.25f;
+            finalR = lerp(90.0f, 160.0f, localT);
+            finalG = lerp(180.0f, 140.0f, localT);
+            finalB = lerp(60.0f, 80.0f, localT);
+        }
+        else if (t < 0.75f)
+        {
+            // Mountains: Earthy Brown transitioning to Dark Grey/Stone
+            float localT = (t - 0.5f) / 0.25f;
+            finalR = lerp(160.0f, 100.0f, localT);
+            finalG = lerp(140.0f, 100.0f, localT);
+            finalB = lerp(80.0f, 100.0f, localT);
+        }
+        else
+        {
+            // Alpine Peaks: Stone transitioning to Snow
+            float localT = (t - 0.75f) / 0.25f;
+            finalR = lerp(100.0f, 255.0f, localT);
+            finalG = lerp(100.0f, 255.0f, localT);
+            finalB = lerp(100.0f, 255.0f, localT);
+        }
+
+        return {
+            static_cast<unsigned char>(std::clamp(finalR, 0.0f, 255.0f)),
+            static_cast<unsigned char>(std::clamp(finalG, 0.0f, 255.0f)),
+            static_cast<unsigned char>(std::clamp(finalB, 0.0f, 255.0f)),
+            255
+        };
+    }
+
 
     void renderChunk(const generation::Chunk& chunk, bool polygonOutlines)
     {
@@ -121,7 +218,10 @@ namespace renderer
                 continue;
             }
 
-            Color cellColor = getBiomeColor(biomes[i]);
+            // Color cellColor = getBiomeColor(biomes[i]);
+            Color cellColor = getContinuousColor(chunk.terrainData.elevationMap[i],
+                                                chunk.terrainData.moistureMap[i],
+                                                chunk.terrainData.temperatureMap[i]);
 
             std::vector<Vector2> fanPoints;
             fanPoints.reserve(diagram.polygons[i].indices.size());
@@ -139,9 +239,6 @@ namespace renderer
             }
         }
     }
-
-
-
 
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {

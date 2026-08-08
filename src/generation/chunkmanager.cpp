@@ -91,12 +91,13 @@ namespace generation
         auto& terrain = centerChunk->terrainData;
         terrain.elevationMap = terrainNoiseMap.generateElevationNoiseMap(xCoords, yCoords);
         terrain.moistureMap = terrainNoiseMap.generateMoistureNoiseMap(xCoords, yCoords);
+        terrain.temperatureMap = terrainNoiseMap.generateTemperatureNoiseMap(xCoords, yCoords);
         terrain.biomes.reserve(xCoords.size());
 
         for (size_t i = 0; i < xCoords.size(); ++i)
         {
             terrain.biomes.push_back(
-                terrain::getBiomeType(terrain.elevationMap[i], terrain.moistureMap[i])
+                terrain::getBiomeType(terrain.elevationMap[i], terrain.moistureMap[i], terrain.temperatureMap[i])
             );
         }
 

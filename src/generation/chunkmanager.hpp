@@ -19,6 +19,7 @@ namespace generation
     {
         std::vector<float> elevationMap;
         std::vector<float> moistureMap;
+        std::vector<float> temperatureMap;
         std::vector<terrain::BiomeType> biomes;
     };
 

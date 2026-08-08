@@ -49,13 +49,11 @@ int main()
         log("Chunks loaded: " + std::to_string(chunks.size()));
         log("Number of relaxation iterations: " + std::to_string(config::generation::RELAXATION_ITERATIONS));
 
+        float baseTemperature = 0.0f;
+        float moistureMultiplier = 0.0f;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            // voronoiDiagram = generation::pipeline::generate(
-            //     GetRandomValue(0, 2147483647),
-            //     bounds
-            // );
-
             // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
             // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
             //
@@ -80,7 +78,7 @@ int main()
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
                      // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
-                    renderer::renderChunk(*chunk, true);
+                    renderer::renderChunk(*chunk, false);
 
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
@@ -92,7 +90,6 @@ int main()
                 renderer::renderChunkGrid(*chunkManager);
             }
             EndMode2D(); // End Camera Transformations
-
         }
         EndDrawing();
     }
