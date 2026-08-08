@@ -5,20 +5,35 @@
 #include "FastNoise/Generators/Fractal.h"
 #include "core/config.hpp"
 
-
 #include <vector>
+
 
 namespace terrain
 {
 
     TerrainNoiseMap::TerrainNoiseMap(int seed)
-        : rootNode(nullptr), seed(seed)
+        : seed(seed), elevationRootNode(nullptr), moistureRootNode(nullptr)
     {
-        BuildNodeTree();
+        buildElevationNodeTree();
+        buildMoistureNodeTree();
     }
 
-    std::vector<float> TerrainNoiseMap::getElevationNoiseMap(const std::vector<float>& xCoords,
-                                                             const std::vector<float>& yCoords) const
+    std::vector<float> TerrainNoiseMap::generateElevationNoiseMap(const std::vector<float>& xCoords,
+                                                                  const std::vector<float>& yCoords) const
+    {
+        return generateNoiseMap(xCoords, yCoords, elevationRootNode);
+    }
+
+    std::vector<float> TerrainNoiseMap::generateMoistureNoiseMap(const std::vector<float>& xCoords,
+                                                                 const std::vector<float>& yCoords) const
+    {
+        return generateNoiseMap(xCoords, yCoords, moistureRootNode, MOISTURE_SEED_OFFSET);
+    }
+
+    std::vector<float> TerrainNoiseMap::generateNoiseMap(const std::vector<float>& xCoords,
+                                                         const std::vector<float>& yCoords,
+                                                         const FastNoise::SmartNode<>& rootNode,
+                                                         int seedOffset) const
     {
         std::vector<float> noiseMap;
         noiseMap.reserve(xCoords.size());
@@ -29,12 +44,13 @@ namespace terrain
                                      yCoords.data(),
                                      0.0f,  // these offsets are used for shifting sampling region
                                      0.0f,  // this function expects the x and y coordinates to be in world space, so we don't need to offset them
-                                     seed);
+                                     seed + seedOffset);
 
         return std::move(noiseMap);
     }
 
-    void TerrainNoiseMap::BuildNodeTree()
+
+    void TerrainNoiseMap::buildElevationNodeTree()
     {
         // large continents and oceans
         auto continentalBase = FastNoise::New<FastNoise::Simplex>();
@@ -68,6 +84,18 @@ namespace terrain
         finalTerrain->SetLHS(continentalBase);
         finalTerrain->SetRHS(modulateDetail);
 
-        rootNode = finalTerrain;
+        elevationRootNode = finalTerrain;
+    }
+
+    void TerrainNoiseMap::buildMoistureNodeTree()
+    {
+        auto moistureBase = FastNoise::New<FastNoise::Simplex>();
+        moistureBase->SetScale(config::generation::CONTINENTAL_SCALE * 0.8f); // Slightly different scale
+
+        auto moistureFractal = FastNoise::New<FastNoise::FractalFBm>();
+        moistureFractal->SetSource(moistureBase);
+        moistureFractal->SetOctaveCount(4);
+
+        moistureRootNode = moistureFractal;
     }
 }

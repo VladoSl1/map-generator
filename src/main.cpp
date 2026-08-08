@@ -59,14 +59,14 @@ int main()
             // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
             // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
             //
-            config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
+            // config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
+            // //
+            // chunkManager = std::make_shared<generation::ChunkManager>(42);
             //
-            chunkManager = std::make_shared<generation::ChunkManager>(42);
-
-            chunks = chunkManager->listAllChunks();
-            voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
-
-            chunkStreamer = renderer::ChunkStreamer(chunkManager);
+            // chunks = chunkManager->listAllChunks();
+            // voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
+            //
+            // chunkStreamer = renderer::ChunkStreamer(chunkManager);
         }
 
         BeginDrawing();
@@ -79,25 +79,12 @@ int main()
                 for (const auto& chunk : chunks)
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
-                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+                     // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+                    renderer::renderChunk(*chunk, true);
 
-                    renderer::renderPoints(voronoiDiagram.seeds, RED);
+                    // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
-
-                    if (voronoiDiagram.seeds.size() > 10)
-                    {
-                        // renderer::renderPoints({
-                        //     voronoiDiagram.seeds[10]}, GREEN);
-
-                        // std::vector<math::EdgeI> highlightedEdges;
-                        // for (size_t edgeIdx : voronoiDiagram.polygons[10].indices)
-                        // {
-                        //     highlightedEdges.push_back(voronoiDiagram.edges[edgeIdx]);
-                        // }
-
-                        // renderer::renderEdges(voronoiDiagram.vertices, highlightedEdges, ORANGE);
-                    }
 
                     // log("Chunk coords: ", chunk->chunkCoords.x, ", ", chunk->chunkCoords.y);
                 }

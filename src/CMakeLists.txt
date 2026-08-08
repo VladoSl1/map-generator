@@ -30,6 +30,11 @@ target_sources(map_gen_lib
         generation/pipeline/voronoi_diagram.hpp
         generation/pipeline/voronoi_diagram.cpp
 
+        generation/terrain/noise_maps.hpp
+        generation/terrain/noise_maps.cpp
+
+        generation/terrain/biome.hpp
+
         generation/chunkmanager.hpp
         generation/chunkmanager.cpp
 

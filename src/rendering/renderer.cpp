@@ -15,14 +15,6 @@
 
 namespace renderer
 {
-<<<<<<< HEAD
-=======
-
-
-
-
-
->>>>>>> 2c8d59f (Fix missing return and do better decomposition)
     void renderPoints(const std::vector<math::Point2Dd>& points, Color color)
     {
         for (const auto& point : points)
@@ -89,6 +81,68 @@ namespace renderer
         }
     }
 
+    static Color getBiomeColor(terrain::BiomeType biome)
+    {
+        switch (biome)
+        {
+            case terrain::BiomeType::DEEP_OCEAN:               return { 26, 68, 122, 255 };
+            case terrain::BiomeType::OCEAN:                    return { 66, 161, 204, 255 };
+
+            case terrain::BiomeType::BEACH:                    return { 240, 223, 163, 255 };
+
+            case terrain::BiomeType::SCORCHED:                 return { 71, 59, 58, 255 };
+            case terrain::BiomeType::BARE:                     return { 130, 119, 112, 255 };
+            case terrain::BiomeType::TUNDRA:                   return { 166, 184, 173, 255 };
+            case terrain::BiomeType::SNOW:                     return { 245, 250, 252, 255 };
+
+            case terrain::BiomeType::TEMPERATE_DESERT:         return { 214, 203, 156, 255 };
+            case terrain::BiomeType::SHRUBLAND:                return { 156, 176, 130, 255 };
+            case terrain::BiomeType::TAIGA:                    return { 106, 140, 107, 255 };
+
+            case terrain::BiomeType::SUBTROPICAL_DESERT:       return { 224, 194, 137, 255 };
+            case terrain::BiomeType::GRASSLAND:                return { 128, 191, 117, 255 };
+            case terrain::BiomeType::TROPICAL_SEASONAL_FOREST: return { 89, 168, 92, 255 };
+            case terrain::BiomeType::TROPICAL_RAIN_FOREST:     return { 44, 130, 81, 255 };
+
+            default:                                           return MAGENTA; // Error color
+        }
+    }
+
+    void renderChunk(const generation::Chunk& chunk, bool polygonOutlines)
+    {
+        const auto& diagram = chunk.voronoiDiagram;
+        const auto& biomes = chunk.terrainData.biomes;
+
+        for (size_t i = 0; i < diagram.polygons.size(); ++i)
+        {
+            // Skip invalid polygons
+            if (!diagram.isPolygonClosed(i) || diagram.polygons[i].indices.size() < 3)
+            {
+                continue;
+            }
+
+            Color cellColor = getBiomeColor(biomes[i]);
+
+            std::vector<Vector2> fanPoints;
+            fanPoints.reserve(diagram.polygons[i].indices.size());
+            for (size_t idx : diagram.polygons[i].indices)
+            {
+                fanPoints.push_back(toRaylib(diagram.vertices[idx]));
+            }
+
+            DrawTriangleFan(fanPoints.data(), fanPoints.size(), cellColor);
+
+            if (polygonOutlines)
+            {
+                fanPoints.push_back(fanPoints.front());
+                DrawLineStrip(fanPoints.data(), fanPoints.size(), ColorAlpha(BLACK, 0.1f));
+            }
+        }
+    }
+
+
+
+
     void renderChunkGrid(const generation::ChunkManager& chunkManager)
     {
         const auto chunks = chunkManager.listAllChunks();
@@ -102,10 +156,8 @@ namespace renderer
 
             const Rectangle chunkRect{ startX, startY, width, height };
 
-            // Draw the chunk border (2 pixels thick, gray color)
             DrawRectangleLinesEx(chunkRect, 2.0f, DARKGRAY);
 
-            // Draw the chunk coordinates in the top-left corner of each chunk
             const char* coordText = TextFormat("(%d, %d)", chunk->chunkCoords.x, chunk->chunkCoords.y);
             DrawText(coordText, startX + 5, startY + 5, 20, LIGHTGRAY);
         }

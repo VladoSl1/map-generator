@@ -24,5 +24,8 @@ namespace renderer
     void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
                         Color color);
 
+    static Color getBiomeColor(terrain::BiomeType biome);
+    void renderChunk(const generation::Chunk& chunk, bool polygonOutlines = false);
+
     void renderChunkGrid(const generation::ChunkManager& chunkManager);
 }
