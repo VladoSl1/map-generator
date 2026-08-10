@@ -2,7 +2,11 @@
 
 #include <FastNoise/FastNoise.h>
 
+#include "FastNoise/Generators/Cellular.h"
+#include "FastNoise/Generators/DomainWarpSimplex.h"
 #include "FastNoise/Generators/Fractal.h"
+#include "FastNoise/Generators/Modifiers.h"
+#include "FastNoise/Generators/Simplex.h"
 #include "core/config.hpp"
 
 #include <vector>
@@ -57,59 +61,70 @@ namespace terrain
         return std::move(noiseMap);
     }
 
-
+    /* Best way to develop this kind of noise is to use Node Editor related to FastNoise2 (see their github repo).
+     * Encoded node tree: KAAC@BERcJFwkpCQ0ABQ@BikcP0/CQYAAMBWQwQDrkfhPgvhepQ/BBMAAIC/BAL/AgAEAv8DAAQQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HANmZjpCBBPNzEw+BA=="
+     * For better understanding without the use of editor we are also providng the code to build the same node tree programmatically.
+     * The structure should be the same, but the constants may differ.
+     *
+     * The idea behind this noise is to have some "continental" noise which wold determine where is land and then on top of it add
+     * mountains.
+     * */
     void TerrainNoiseMap::buildElevationNodeTree()
     {
-        // large continents and oceans
+        // CONTINENT
+
         auto continentalBase = FastNoise::New<FastNoise::Simplex>();
         continentalBase->SetScale(config::generation::CONTINENTAL_SCALE);
 
         auto continentalFractal = FastNoise::New<FastNoise::FractalFBm>();
         continentalFractal->SetSource(continentalBase);
-        continentalFractal->SetOctaveCount(20);
+        continentalFractal->SetWeightedStrength(1.16f);
+        continentalFractal->SetOctaveCount(5);
+        continentalFractal->SetLacunarity(2.0f);
 
-        auto erosionBase = FastNoise::New<FastNoise::Simplex>();
-        erosionBase->SetScale(config::generation::EROSION_SCALE);
+        auto continentalSquared = FastNoise::New<FastNoise::Multiply>();
+        continentalSquared->SetLHS(continentalFractal);
+        continentalSquared->SetRHS(continentalFractal);
 
-        // scales the level of Detail in the noise map, flat vs. steep
-        auto erosionRemap = FastNoise::New<FastNoise::Remap>();
-        erosionRemap->SetSource(erosionBase);
-        // mapping [-1, 1] to [0, 1] so that the erosion noise can be used as a weight for the detail noise
-        erosionRemap->SetFromMin(-1.0f);
-        erosionRemap->SetFromMax(1.0f);
-        erosionRemap->SetToMin(0.0f);
-        erosionRemap->SetToMax(0.25f);
+        auto continentalCubed = FastNoise::New<FastNoise::Multiply>();
+        continentalCubed->SetLHS(continentalSquared);
+        continentalCubed->SetRHS(continentalFractal);
 
-        // detail
-        auto detailBase = FastNoise::New<FastNoise::Simplex>();
-        detailBase->SetScale(config::generation::DETAIL_SCALE);
+        // MOUNTAINS
+        auto mountainBase = FastNoise::New<FastNoise::SuperSimplex>();
+        mountainBase->SetScale(config::generation::MOUNTAIN_SCALE);
 
-        auto detailMask = FastNoise::New<FastNoise::FractalFBm>();
-        detailMask->SetSource(detailBase);
-        detailMask->SetOctaveCount(config::generation::DETAIL_OCTAVE_COUNT);
+        auto mountainFractal = FastNoise::New<FastNoise::FractalFBm>();
+        mountainFractal->SetSource(mountainBase);
+        mountainFractal->SetGain(0.5f);
+        mountainFractal->SetOctaveCount(7);
+        mountainFractal->SetWeightedStrength(1.0f);
+        mountainFractal->SetLacunarity(2.5f);
 
-        auto modulateDetail = FastNoise::New<FastNoise::Multiply>();
-        modulateDetail->SetLHS(detailMask);
-        modulateDetail->SetRHS(erosionRemap);
+        auto mountainRotatedPlane = FastNoise::New<FastNoise::DomainRotatePlane>();
+        mountainRotatedPlane->SetSource(mountainFractal);
+        mountainRotatedPlane->SetRotationType(FastNoise::PlaneRotationType::ImproveXZPlanes);
 
-        auto coastBase = FastNoise::New<FastNoise::Abs>();
-        coastBase->SetSource(continentalBase);
+        auto mountainAxisScale = FastNoise::New<FastNoise::DomainAxisScale>();
+        mountainAxisScale->SetSource(mountainRotatedPlane);
+        mountainAxisScale->SetScaling<FastNoise::Dim::Y>(0.66f);
 
-        auto coastRemap = FastNoise::New<FastNoise::Remap>();
-        coastRemap->SetSource(coastBase);
-        coastRemap->SetFromMin(0.0f);
-        coastRemap->SetFromMax(0.5f); // Tune this to make coastlines wider or tighter
-        coastRemap->SetToMin(0.0f);    // 0 detail exactly at coast
-        coastRemap->SetToMax(1.0f);    // 1.0 multiplier inland/deep sea
+        auto mountainInvert = FastNoise::New<FastNoise::Subtract>();
+        mountainInvert->SetRHS(mountainAxisScale);
 
-        auto finalDetailMask = FastNoise::New<FastNoise::Multiply>();
-        finalDetailMask->SetLHS(modulateDetail);
-        finalDetailMask->SetRHS(coastRemap);
+        auto mountainWarpSimplex = FastNoise::New<FastNoise::DomainWarpSimplex>();
+        mountainWarpSimplex->SetSource(mountainInvert);
+        mountainWarpSimplex->SetWarpAmplitude(50.0f);
+        mountainWarpSimplex->SetScale(600.0f);
+        mountainWarpSimplex->SetAmplitudeScaling<FastNoise::Dim::Y>(-0.26);
+        mountainWarpSimplex->SetVectorizationScheme(FastNoise::VectorizationScheme::OrthogonalGradientMatrix);
 
-        auto finalTerrain = FastNoise::New<FastNoise::Add>();
-        finalTerrain->SetLHS(continentalFractal);
-        // finalTerrain->SetRHS(modulateDetail);
-        finalTerrain->SetRHS(finalDetailMask);
+
+        auto finalTerrain = FastNoise::New<FastNoise::Fade>();
+        finalTerrain->SetA(continentalCubed);
+        finalTerrain->SetB(mountainWarpSimplex);
+        finalTerrain->SetFade(0.0f);
+        finalTerrain->SetFadeMax(0.2);
 
         elevationRootNode = finalTerrain;
     }

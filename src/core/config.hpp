@@ -15,8 +15,7 @@ namespace config
 
     namespace generation
     {
-        inline constexpr int NUM_POINTS = 4000;
-        inline constexpr int INSIDE_PADDING = 15;
+        inline constexpr int NUM_POINTS = 3000;
         inline constexpr int CHUNK_WIDTH = 1000;
         inline constexpr int CHUNK_HEIGHT = 1000;
         inline constexpr int RELAXATION_ITERATIONS = 2;
@@ -24,10 +23,11 @@ namespace config
         /* Size of one voroni cell in pixels is roughly
          * CHUNK_WIDTH / SQRT(NUM_POINTS) -> 500 / 14.1 \approx 35 pixels */
 
-        inline constexpr float CONTINENTAL_SCALE = 1000.0f;
-        inline constexpr float EROSION_SCALE = 50.0f;
-        inline constexpr float DETAIL_SCALE = 6.0f;
-        inline constexpr int DETAIL_OCTAVE_COUNT = 5;
+        inline constexpr float CONTINENTAL_SCALE = 215.0f;
+        inline constexpr float MOUNTAIN_SCALE = 600.0f;
+        // inline constexpr float EROSION_SCALE = 50.0f;
+        // inline constexpr float DETAIL_SCALE = 6.0f;
+        // inline constexpr int DETAIL_OCTAVE_COUNT = 5;
 
         /* If moisture scale were the same as continental scale, moisture map would mirror continental map,
          * which would create uniform biomes across the map. */
@@ -36,6 +36,8 @@ namespace config
 
         inline constexpr float TEMPERATURE_SCALE = CONTINENTAL_SCALE * 0.3f;
         inline constexpr int TEMPERATURE_OCTAVE_COUNT = 3;
+
+
     }
 
     namespace renderer
@@ -45,7 +47,12 @@ namespace config
         inline constexpr float CAMERA_ZOOM_STEP = 0.125f;
         inline constexpr math::Interval<float> CAMERA_ZOOM_RANGE{0.1f, 5.0f};
         inline constexpr math::Point2Df DEFAULT_CAMERA_POSITION{0.0f, 0.0f};
-        inline constexpr int CHUNK_RENDER_DISTANCE = 2;
+        inline constexpr int CHUNK_RENDER_DISTANCE = 0;
+
+        inline constexpr float SNOW_LINE_ELEVATION    = 1.f;
+        inline constexpr float SNOW_LINE_TEMP_STRENGTH = 0.3f;
+
+
     }
 }
 
