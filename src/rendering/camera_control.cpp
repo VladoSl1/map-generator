@@ -8,7 +8,7 @@ namespace renderer
 {
     CameraController::CameraController(int screenWidth, int screenHeight)
     {
-        camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // Where the camera is looking in world space
+        camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // where the camera is looking in world space
         camera.rotation = 0.0f;
         camera.offset = { static_cast<float>(screenWidth) / 2.0f,
                           static_cast<float>(screenHeight) / 2.0f };
@@ -17,8 +17,8 @@ namespace renderer
 
     void CameraController::update()
     {
-        // Drag: with Right Mouse Button
-        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+        // drag to move
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             Vector2 delta = GetMouseDelta();
 
@@ -27,7 +27,7 @@ namespace renderer
             camera.target = Vector2Add(camera.target, delta);
         }
 
-        // Zoom: Mouse Wheel
+        // zoom
         float wheel = GetMouseWheelMove();
         if (wheel != 0.0f)
         {
@@ -43,7 +43,7 @@ namespace renderer
                                      config::renderer::CAMERA_ZOOM_RANGE.min,
                                      config::renderer::CAMERA_ZOOM_RANGE.max);
 
-            // shift the offset to the current mouse position and target to the saved world position.
+            // zoom towards the mouse position
             camera.offset = GetMousePosition();
             camera.target = mouseWorldPos;
         }
@@ -60,8 +60,6 @@ namespace renderer
             {topLeft.y, bottomRight.y}
         };
     }
-
-
 
     const Camera2D& CameraController::getCamera() const
     {

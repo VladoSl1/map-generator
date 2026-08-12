@@ -24,8 +24,8 @@ namespace generation::pipeline
         std::vector<math::EdgeI> edges;
         std::vector<math::TriangleI> delaunayTriangles;
 
-        void generate(std::vector<math::Point2Dd>& triangleSeeds,
-                      const std::vector<math::TriangleI>& triangleIndices);
+        void generate(std::vector<math::Point2Dd> triangleSeeds,
+                      std::vector<math::TriangleI> triangleIndices);
 
         /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
          * fixedTopology: Difference from the original algorithm is that we are not recalculating the Voronoi diagram from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.

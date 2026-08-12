@@ -1,10 +1,15 @@
 #include "chunkmanager.hpp"
-#include "core/config.hpp"
-#include "core/math/point2d.hpp"
+
 #include "generation/pipeline/pipeline.hpp"
 #include "generation/pipeline/point_sampling.hpp"
-#include "core/utils/debug.hpp"
 #include "generation/pipeline/voronoi_diagram.hpp"
+#include "generation/terrain/noise_maps.hpp"
+#include "generation/terrain/biome.hpp"
+
+#include "core/config.hpp"
+#include "core/math/point2d.hpp"
+#include "core/utils/debug.hpp"
+
 #include <cstdint>
 
 namespace generation
@@ -22,6 +27,20 @@ namespace generation
         return { {minX, minX + config::generation::CHUNK_WIDTH}, {minY, minY + config::generation::CHUNK_HEIGHT} };
     }
 
+    ChunkManager::ChunkManager(int worldSeed)
+        : m_worldSeed(worldSeed), terrainNoiseMap(worldSeed)
+    {
+        preloadChunks({0, 0});
+    }
+
+
+    /*
+    * First, preload chunks (generate only seeds). Then copy all of these seeds to combinedSeeds
+    * and generate large voronoi diagram for 3x3 chunks. Relaxing this large diagram ensures that
+    * even the voronoi cells on the edges of central chunk are relaxed properly.
+    * The relaxation is happening on unrelaxed seeds of neighboring chunks, therefore the final chunk
+    * will be always the same regardless of the order of loading chunks.
+    */
     void ChunkManager::loadChunk(math::Point2Di chunkCoords)
     {
         const uint64_t key = hashChunk(chunkCoords);
@@ -33,7 +52,7 @@ namespace generation
         }
 
         std::vector<math::Point2Dd> combinedSeeds;
-        combinedSeeds.reserve(9L * config::generation::NUM_POINTS);
+        combinedSeeds.reserve(9L * config::generation::NUM_POINTS);  // 9 chunks, each with NUM_POINTS seeds
 
         preloadChunks(chunkCoords);
 
@@ -54,10 +73,34 @@ namespace generation
             extendedDiagram.relax();
         }
 
-        size_t startIndex = 4L*config::generation::NUM_POINTS;
-        size_t endIndex = 5L*config::generation::NUM_POINTS;
+        const size_t startIndex = 4L*config::generation::NUM_POINTS;  // central chunk is at index 4 in the 3x3 grid of chunks
+        const size_t endIndex = startIndex + config::generation::NUM_POINTS;
         centerChunk->voronoiDiagram = extendedDiagram.extractVoronoiSubset(startIndex, endIndex);
-        // centerChunk->preloadedSeeds.clear();
+
+        std::vector<float> xCoords;
+        std::vector<float> yCoords;
+        xCoords.reserve(centerChunk->voronoiDiagram.seeds.size());
+        yCoords.reserve(centerChunk->voronoiDiagram.seeds.size());
+
+        for (const auto& seed : centerChunk->voronoiDiagram.seeds)
+        {
+            xCoords.push_back(static_cast<float>(seed.x));
+            yCoords.push_back(static_cast<float>(seed.y));
+        }
+
+        auto& terrain = centerChunk->terrainData;
+        terrain.elevationMap = terrainNoiseMap.generateElevationNoiseMap(xCoords, yCoords);
+        terrain.moistureMap = terrainNoiseMap.generateMoistureNoiseMap(xCoords, yCoords);
+        terrain.temperatureMap = terrainNoiseMap.generateTemperatureNoiseMap(xCoords, yCoords);
+        terrain.biomes.reserve(xCoords.size());
+
+        for (size_t i = 0; i < xCoords.size(); ++i)
+        {
+            terrain.biomes.push_back(
+                terrain::getBiomeType(terrain.elevationMap[i], terrain.moistureMap[i], terrain.temperatureMap[i])
+            );
+        }
+
         centerChunk->state = Chunk::State::LOADED;
     }
 

@@ -4,8 +4,9 @@
 #include "core/math/point2d.hpp"
 #include "core/math/sorting.hpp"
 
-// TODO: remove this include, it is only used for debugging
 #include "delaunay_triangulation.hpp"
+
+#include "core/utils/debug.hpp"
 
 #include <cassert>
 
@@ -52,15 +53,15 @@ namespace generation::pipeline
      * It is possible to directly calculate the Voronoi edges from points without Delaunay
      * triangles, but this approach is much more complicated.
      * */
-    void DynamicVoronoiDiagram::generate(std::vector<math::Point2Dd>& triangleSeeds,
-                                  const std::vector<math::TriangleI>& triangleIndices)
+    void DynamicVoronoiDiagram::generate(std::vector<math::Point2Dd> triangleSeeds,
+                                         std::vector<math::TriangleI> triangleIndices)
     {
         clear();
         polygons.resize(triangleSeeds.size());
         openPolygons.assign(triangleSeeds.size(), false);
 
-        seeds = triangleSeeds; //TODO: consider move semantics
-        delaunayTriangles = triangleIndices; //TODO: consider move semantics
+        seeds = std::move(triangleSeeds);
+        delaunayTriangles = std::move(triangleIndices);
         vertices = calculateVoronoiVertices(seeds, delaunayTriangles);
 
         std::vector<EdgeWithOwner> triangleEdgesWithId;
@@ -213,7 +214,7 @@ namespace generation::pipeline
         //     }
         // }
 
-        return std::move(subsetVoronoi);
+        return subsetVoronoi;
     }
 
     void DynamicVoronoiDiagram::relax(bool fixedTopology)
@@ -278,6 +279,6 @@ namespace generation::pipeline
             }
         }
 
-        return std::move(voronoiVertices);
+        return voronoiVertices;
     }
 }
