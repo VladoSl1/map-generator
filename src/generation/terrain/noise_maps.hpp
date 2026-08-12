@@ -30,7 +30,7 @@ namespace terrain
         FastNoise::SmartNode<> temperatureRootNode;
         FastNoise::SmartNode<> continentalNode;
 
-        void buildElevationNodeTree();
+        void buildElevationNodeTree(bool useEncodedString = true);
         void buildMoistureNodeTree();
         void buildTemperatureNodeTree();
 

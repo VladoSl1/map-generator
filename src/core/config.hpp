@@ -23,11 +23,9 @@ namespace config
         /* Size of one voroni cell in pixels is roughly
          * CHUNK_WIDTH / SQRT(NUM_POINTS) -> 500 / 14.1 \approx 35 pixels */
 
-        inline constexpr float CONTINENTAL_SCALE = 215.0f;
-        inline constexpr float MOUNTAIN_SCALE = 600.0f;
-        // inline constexpr float EROSION_SCALE = 50.0f;
-        // inline constexpr float DETAIL_SCALE = 6.0f;
-        // inline constexpr int DETAIL_OCTAVE_COUNT = 5;
+        inline constexpr float CONTINENTAL_SCALE = 2000.0f;
+        inline constexpr float MOUNTAIN_SCALE = 150.0f;
+        inline constexpr char *ELEVATION_NODE_TREE_ENCODED = "KAAC@BER4JKQkNAAU@BIpHD9PwkG@BlkMEA65H4T4L4XqUPwQTAACAvwwQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HAMAACBCBBM@B/BA==";
 
         /* If moisture scale were the same as continental scale, moisture map would mirror continental map,
          * which would create uniform biomes across the map. */
@@ -36,8 +34,6 @@ namespace config
 
         inline constexpr float TEMPERATURE_SCALE = CONTINENTAL_SCALE * 0.3f;
         inline constexpr int TEMPERATURE_OCTAVE_COUNT = 3;
-
-
     }
 
     namespace renderer
@@ -51,8 +47,6 @@ namespace config
 
         inline constexpr float SNOW_LINE_ELEVATION    = 1.f;
         inline constexpr float SNOW_LINE_TEMP_STRENGTH = 0.3f;
-
-
     }
 }
 

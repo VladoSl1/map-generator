@@ -62,17 +62,22 @@ namespace terrain
     }
 
     /* Best way to develop this kind of noise is to use Node Editor related to FastNoise2 (see their github repo).
-     * Encoded node tree: KAAC@BERcJFwkpCQ0ABQ@BikcP0/CQYAAMBWQwQDrkfhPgvhepQ/BBMAAIC/BAL/AgAEAv8DAAQQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HANmZjpCBBPNzEw+BA=="
+     * Encoded node tree:  KAAC@BER4JKQkNAAU@BIpHD9PwkG@BlkMEA65H4T4L4XqUPwQTAACAvwwQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HAMAACBCBBM@B/BA==
      * For better understanding without the use of editor we are also providng the code to build the same node tree programmatically.
-     * The structure should be the same, but the constants may differ.
+     * The structure should be the roughly the same, but the constants may differ.
      *
      * The idea behind this noise is to have some "continental" noise which wold determine where is land and then on top of it add
      * mountains.
      * */
-    void TerrainNoiseMap::buildElevationNodeTree()
+    void TerrainNoiseMap::buildElevationNodeTree(bool useEncodedString)
     {
-        // CONTINENT
+        if (useEncodedString)
+        {
+            elevationRootNode = FastNoise::NewFromEncodedNodeTree(config::generation::ELEVATION_NODE_TREE_ENCODED);
+            return;
+        }
 
+        // CONTINENT
         auto continentalBase = FastNoise::New<FastNoise::Simplex>();
         continentalBase->SetScale(config::generation::CONTINENTAL_SCALE);
 
@@ -82,13 +87,15 @@ namespace terrain
         continentalFractal->SetOctaveCount(5);
         continentalFractal->SetLacunarity(2.0f);
 
-        auto continentalSquared = FastNoise::New<FastNoise::Multiply>();
-        continentalSquared->SetLHS(continentalFractal);
-        continentalSquared->SetRHS(continentalFractal);
-
-        auto continentalCubed = FastNoise::New<FastNoise::Multiply>();
-        continentalCubed->SetLHS(continentalSquared);
-        continentalCubed->SetRHS(continentalFractal);
+        auto continentalSqrt = FastNoise::New<FastNoise::SignedSquareRoot>();
+        continentalSqrt->SetSource(continentalFractal);
+        // auto continentalSquared = FastNoise::New<FastNoise::Multiply>();
+        // continentalSquared->SetLHS(continentalFractal);
+        // continentalSquared->SetRHS(continentalFractal);
+        //
+        // auto continentalCubed = FastNoise::New<FastNoise::Multiply>();
+        // continentalCubed->SetLHS(continentalSquared);
+        // continentalCubed->SetRHS(continentalFractal);
 
         // MOUNTAINS
         auto mountainBase = FastNoise::New<FastNoise::SuperSimplex>();
@@ -114,14 +121,14 @@ namespace terrain
 
         auto mountainWarpSimplex = FastNoise::New<FastNoise::DomainWarpSimplex>();
         mountainWarpSimplex->SetSource(mountainInvert);
-        mountainWarpSimplex->SetWarpAmplitude(50.0f);
+        mountainWarpSimplex->SetWarpAmplitude(45.f);
         mountainWarpSimplex->SetScale(600.0f);
         mountainWarpSimplex->SetAmplitudeScaling<FastNoise::Dim::Y>(-0.26);
         mountainWarpSimplex->SetVectorizationScheme(FastNoise::VectorizationScheme::OrthogonalGradientMatrix);
 
 
         auto finalTerrain = FastNoise::New<FastNoise::Fade>();
-        finalTerrain->SetA(continentalCubed);
+        finalTerrain->SetA(continentalSqrt);
         finalTerrain->SetB(mountainWarpSimplex);
         finalTerrain->SetFade(0.0f);
         finalTerrain->SetFadeMax(0.2);
@@ -137,8 +144,6 @@ namespace terrain
         auto moistureFractal = FastNoise::New<FastNoise::FractalFBm>();
         moistureFractal->SetSource(moistureBase);
         moistureFractal->SetOctaveCount(config::generation::MOISTURE_OCTAVE_COUNT);
-
-
 
         moistureRootNode = moistureFractal;
     }
@@ -159,6 +164,6 @@ namespace terrain
         temperatureRemap->SetToMin(0.0f);
         temperatureRemap->SetToMax(1.0f);
 
-        temperatureRootNode = temperatureBase;
+        temperatureRootNode = temperatureRemap;
     }
 }

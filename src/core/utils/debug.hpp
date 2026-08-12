@@ -17,9 +17,6 @@ void log(Args&&... args) {
 #endif
 }
 
-
-
-// Global state for timers, inline to prevent Multiple Definition linker errors
 #ifdef DEBUG_FLAG
 inline std::unordered_map<std::string, std::chrono::time_point<std::chrono::high_resolution_clock>> g_debug_clocks;
 #endif

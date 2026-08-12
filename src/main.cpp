@@ -26,15 +26,11 @@ int main()
 
     math::AABB bounds{ {0, config::window::WINDOW_WIDTH}, {0, config::window::WINDOW_HEIGHT} };
 
-    log("Generating chunks...");
     auto chunkManager = std::make_shared<generation::ChunkManager>(42);
-    log("Generating chunks... done");
 
-    log("Picking Voronoi diagram...");
     auto chunks = chunkManager->listAllChunks();
     // auto voronoiDiagram = chunkManager.listAllChunks()[0]->voronoiDiagram;
     auto voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
-    log("Picking Voronoi diagram... done");
 
     renderer::CameraController cameraController(config::window::WINDOW_WIDTH, config::window::WINDOW_HEIGHT);
     renderer::ChunkStreamer chunkStreamer(chunkManager);
@@ -46,19 +42,14 @@ int main()
         chunkStreamer.updateLoadedChunks(cameraController.getViewBounds());
 
         chunks = chunkManager->listAllChunks();
-        log("Chunks loaded: " + std::to_string(chunks.size()));
-        log("Number of relaxation iterations: " + std::to_string(config::generation::RELAXATION_ITERATIONS));
 
         float baseTemperature = 0.0f;
         float moistureMultiplier = 0.0f;
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
         {
-            // auto newPoints = generation::pipeline::relaxVoronoiDiagram(voronoiDiagram);
-            // voronoiDiagram = generation::pipeline::generateFromPoints(newPoints);
+            // config::generation::RELAXATION_ITERATIONS++;
             //
-            // config::generation::RELAXATION_ITERATIONS++; //TODO: remove this, just for testing
-            // //
             // chunkManager = std::make_shared<generation::ChunkManager>(42);
             //
             // chunks = chunkManager->listAllChunks();
@@ -78,16 +69,16 @@ int main()
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
                      // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+
                     renderer::renderChunk(*chunk, false);
 
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
-
-                    // log("Chunk coords: ", chunk->chunkCoords.x, ", ", chunk->chunkCoords.y);
                 }
 
-                renderer::renderChunkGrid(*chunkManager);
+                // uncomment to show the chunk grid
+                // renderer::renderChunkGrid(*chunkManager);
             }
             EndMode2D(); // End Camera Transformations
         }
