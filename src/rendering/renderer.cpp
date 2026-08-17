@@ -93,12 +93,12 @@ namespace renderer
         return sampleGradient(t, LAND_GRADIENT);
     }
 
-    void renderPoints(const std::vector<math::Point2Dd>& points, Color color)
+    void renderPoints(const std::vector<math::Point2Dd>& points, Color color, float radius)
     {
         for (const auto& point : points)
         {
             DrawCircle(static_cast<int>(point.x),
-                       static_cast<int>(point.y), config::renderer::POINT_RADIUS, color);
+                       static_cast<int>(point.y), radius, color);
         }
     }
 
@@ -181,7 +181,7 @@ namespace renderer
         }
     }
 
-    void renderChunk(const generation::Chunk& chunk, bool polygonOutlines)
+    void renderChunk(const generation::Chunk& chunk)
     {
         const auto& diagram = chunk.voronoiDiagram;
         const auto& biomes = chunk.terrainData.biomes;
@@ -194,10 +194,17 @@ namespace renderer
                 continue;
             }
 
-            // Color cellColor = getBiomeColor(biomes[i]);
-            Color cellColor = getContinuousColor(chunk.terrainData.elevationMap[i],
-                                                chunk.terrainData.moistureMap[i],
-                                                chunk.terrainData.temperatureMap[i]);
+            Color cellColor;
+            if constexpr (config::renderer::DISCRETE_BIOME_COLORS)
+            {
+                cellColor = getBiomeColor(biomes[i]);
+            }
+            else
+            {
+                cellColor = getContinuousColor(chunk.terrainData.elevationMap[i],
+                                                     chunk.terrainData.moistureMap[i],
+                                                     chunk.terrainData.temperatureMap[i]);
+            }
 
             std::vector<Vector2> fanPoints;
             fanPoints.reserve(diagram.polygons[i].indices.size());
@@ -208,7 +215,7 @@ namespace renderer
 
             DrawTriangleFan(fanPoints.data(), fanPoints.size(), cellColor);
 
-            if (polygonOutlines)
+            if constexpr (config::renderer::SHOW_POLYGON_OUTLINES)
             {
                 fanPoints.push_back(fanPoints.front());
                 DrawLineStrip(fanPoints.data(), fanPoints.size(), ColorAlpha(BLACK, 0.1f));

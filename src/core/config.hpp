@@ -21,7 +21,7 @@ namespace config
         inline constexpr int RELAXATION_ITERATIONS = 2;
 
         /* Size of one voroni cell in pixels is roughly
-         * CHUNK_WIDTH / SQRT(NUM_POINTS) -> 500 / 14.1 \approx 35 pixels */
+         * CHUNK_WIDTH / SQRT(NUM_POINTS) -> 3000 / sqrt(3000) \approx 18 pixels */
 
         inline constexpr float CONTINENTAL_SCALE = 2000.0f;
         inline constexpr float MOUNTAIN_SCALE = 150.0f;
@@ -38,6 +38,10 @@ namespace config
 
     namespace renderer
     {
+        inline constexpr bool SHOW_CHUNK_GRID = false;
+        inline constexpr bool SHOW_POLYGON_OUTLINES = false;
+        inline constexpr bool DISCRETE_BIOME_COLORS = false;
+
         inline constexpr float POINT_RADIUS = 1;
         inline constexpr float DEFAULT_CAMERA_ZOOM = 1.0f;
         inline constexpr float CAMERA_ZOOM_STEP = 0.125f;

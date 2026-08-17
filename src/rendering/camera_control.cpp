@@ -6,12 +6,14 @@
 
 namespace renderer
 {
-    CameraController::CameraController(int screenWidth, int screenHeight)
+    CameraController::CameraController()
+        : screenWidth(GetRenderWidth()), screenHeight(GetRenderHeight())
     {
+
         camera.target = toRaylib(config::renderer::DEFAULT_CAMERA_POSITION); // where the camera is looking in world space
         camera.rotation = 0.0f;
-        camera.offset = { static_cast<float>(screenWidth) / 2.0f,
-                          static_cast<float>(screenHeight) / 2.0f };
+        camera.offset = { screenWidth / 2.0f,
+                          screenHeight / 2.0f };
         camera.zoom = config::renderer::DEFAULT_CAMERA_ZOOM;
     }
 
@@ -52,8 +54,7 @@ namespace renderer
     math::AABB CameraController::getViewBounds() const
     {
         Vector2 topLeft = GetScreenToWorld2D({0, 0}, camera);
-        Vector2 bottomRight = GetScreenToWorld2D({config::window::WINDOW_WIDTH,
-                                                    config::window::WINDOW_HEIGHT}, camera);
+        Vector2 bottomRight = GetScreenToWorld2D({screenWidth, screenHeight}, camera);
 
         return {
             {topLeft.x, bottomRight.x},

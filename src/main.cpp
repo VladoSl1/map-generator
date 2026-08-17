@@ -18,6 +18,7 @@
 
 int main()
 {
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(config::window::WINDOW_WIDTH,
                config::window::WINDOW_HEIGHT,
                config::window::TITLE
@@ -32,7 +33,7 @@ int main()
     // auto voronoiDiagram = chunkManager.listAllChunks()[0]->voronoiDiagram;
     auto voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
 
-    renderer::CameraController cameraController(config::window::WINDOW_WIDTH, config::window::WINDOW_HEIGHT);
+    renderer::CameraController cameraController;
     renderer::ChunkStreamer chunkStreamer(chunkManager);
 
     while (!WindowShouldClose())
@@ -46,18 +47,6 @@ int main()
         float baseTemperature = 0.0f;
         float moistureMultiplier = 0.0f;
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-        {
-            // config::generation::RELAXATION_ITERATIONS++;
-            //
-            // chunkManager = std::make_shared<generation::ChunkManager>(42);
-            //
-            // chunks = chunkManager->listAllChunks();
-            // voronoiDiagram = chunkManager->getChunk({0, 0})->voronoiDiagram;
-            //
-            // chunkStreamer = renderer::ChunkStreamer(chunkManager);
-        }
-
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
@@ -70,17 +59,19 @@ int main()
                     voronoiDiagram = chunk->voronoiDiagram;
                      // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
-                    renderer::renderChunk(*chunk, false);
+                    renderer::renderChunk(*chunk);
 
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
                     // renderer::renderEdges(voronoiDiagram.vertices, voronoiDiagram.edges, PURPLE);
                 }
 
-                // uncomment to show the chunk grid
-                // renderer::renderChunkGrid(*chunkManager);
+                if (config::renderer::SHOW_CHUNK_GRID)
+                {
+                    renderer::renderChunkGrid(*chunkManager);
+                }
             }
-            EndMode2D(); // End Camera Transformations
+            EndMode2D();
         }
         EndDrawing();
     }

@@ -10,7 +10,7 @@
 
 namespace renderer
 {
-    void renderPoints(const std::vector<math::Point2Dd>& points, Color color);
+    void renderPoints(const std::vector<math::Point2Dd>& points, Color color, float radius);
 
     void renderTriangles(const std::vector<math::Point2Dd>& points,
                          const std::vector<math::TriangleI>& triangles,
@@ -18,14 +18,14 @@ namespace renderer
 
     void renderEdges(const std::vector<math::Point2Dd>& points,
                      const std::vector<math::EdgeI>& edges,
-                     Color color);
+                     Color color = BLACK);
 
     /* Expects polygons to be clockwise ordered */
     void renderPolygons(const generation::pipeline::VoronoiDiagram& diagram,
                         Color color);
 
     static Color getBiomeColor(terrain::BiomeType biome);
-    void renderChunk(const generation::Chunk& chunk, bool polygonOutlines = false);
+    void renderChunk(const generation::Chunk& chunk);
 
     void renderChunkGrid(const generation::ChunkManager& chunkManager);
 }

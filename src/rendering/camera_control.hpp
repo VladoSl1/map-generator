@@ -9,8 +9,7 @@ namespace renderer
     class CameraController
     {
     public:
-        // TODO: screenWidth and screenHeight are not used, consider removing them
-        CameraController(int screenWidth, int screenHeight);
+        CameraController();
 
         void update();
 
@@ -21,5 +20,6 @@ namespace renderer
 
     private:
         Camera2D camera = { 0 };
+        float screenWidth, screenHeight;
     };
 }
