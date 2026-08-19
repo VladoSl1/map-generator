@@ -15,6 +15,8 @@ namespace config
 
     namespace generation
     {
+        inline constexpr int SEED = 0;  // 0 for random seed, any other number for specific constant
+
         inline constexpr int NUM_POINTS = 3000;
         inline constexpr int CHUNK_WIDTH = 1000;
         inline constexpr int CHUNK_HEIGHT = 1000;

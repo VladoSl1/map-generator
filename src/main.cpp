@@ -1,7 +1,5 @@
 #include "raylib.h"
 
-#include "core/config.hpp"
-
 #include "generation/pipeline/pipeline.hpp"
 #include "generation/pipeline/voronoi_diagram.hpp"
 
@@ -11,9 +9,12 @@
 #include "rendering/camera_control.hpp"
 #include "rendering/chunkstreamer.hpp"
 
-#include <vector>
-
+#include "core/config.hpp"
 #include "core/utils/debug.hpp"
+#include "core/utils/random.hpp"
+
+#include <vector>
+#include <limits>
 
 
 int main()
@@ -25,7 +26,13 @@ int main()
     );
     SetTargetFPS(config::window::FPS);
 
-    math::AABB bounds{ {0, config::window::WINDOW_WIDTH}, {0, config::window::WINDOW_HEIGHT} };
+    const math::AABB bounds{ {0, config::window::WINDOW_WIDTH}, {0, config::window::WINDOW_HEIGHT} };
+
+    int seed = config::generation::SEED;
+    if constexpr (config::generation::SEED == 0)
+    {
+        seed = utils::getRandomNumber<int>({1, std::numeric_limits<int>::max()}, seed);
+    }
 
     auto chunkManager = std::make_shared<generation::ChunkManager>(42);
 
@@ -43,9 +50,6 @@ int main()
         chunkStreamer.updateLoadedChunks(cameraController.getViewBounds());
 
         chunks = chunkManager->listAllChunks();
-
-        float baseTemperature = 0.0f;
-        float moistureMultiplier = 0.0f;
 
         BeginDrawing();
         {

@@ -36,7 +36,7 @@ namespace generation
         math::AABB bounds;
 
         std::vector<math::Point2Dd> preloadedSeeds;
-        pipeline::VoronoiDiagram voronoiDiagram; //TODO: consider using pointer to seeds in voronoiDiagram to avoid copying seeds when loading chunks
+        pipeline::VoronoiDiagram voronoiDiagram;
 
         TerrainData terrainData;
 

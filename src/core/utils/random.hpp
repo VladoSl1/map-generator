@@ -9,7 +9,7 @@ namespace utils
 {
     using RngEngine = std::mt19937;
 
-    // this is ment to be used outside of the loop, so that the distribution is constructed only once, and not for every iteration
+    // this is ment to be used outside of the hot loop, so that the distribution is constructed only once, and not for every iteration
     template <typename T>
     inline auto makeDistribution(const math::Interval<T>& interval)
     {
@@ -33,5 +33,13 @@ namespace utils
     {
         auto dist = makeDistribution(interval);
         return dist(engine);
+    }
+
+    // generation of single random number, slow for many
+    template <typename T>
+    inline T getRandomNumber(const math::Interval<T>& interval, int seed)
+    {
+        RngEngine rngEngine(seed);
+        return getRandom(rngEngine, interval);
     }
 }
