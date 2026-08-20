@@ -32,8 +32,12 @@ namespace math
     using EdgeI     = IndexPrimitive<2>;
     using TriangleI = IndexPrimitive<3>;
 
+    /* TODO: consider using std::array for PolygonI
+     * advantages: no heap allocation
+     * such approach improved performance of getIndicesPolygon
+     */
     using PolygonI = IndexContainer<std::vector<size_t>>;
-
+    // using PolygonI = IndexPrimitive<32>;
 
     bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
