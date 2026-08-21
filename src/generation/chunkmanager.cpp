@@ -66,12 +66,15 @@ namespace generation
             }
         }
 
-        pipeline::DynamicVoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
+        startClock("Generating Voronoi diagram for chunk " + std::to_string(chunkCoords.x) + ", " + std::to_string(chunkCoords.y));
 
+        pipeline::DynamicVoronoiDiagram extendedDiagram = pipeline::generateFromPoints(combinedSeeds);
         for (int i = 0; i < config::generation::RELAXATION_ITERATIONS; ++i)
         {
-            extendedDiagram.relax();
+            extendedDiagram.relax(false);
         }
+
+        stopClock("Generating Voronoi diagram for chunk " + std::to_string(chunkCoords.x) + ", " + std::to_string(chunkCoords.y));
 
         const size_t startIndex = 4L*config::generation::NUM_POINTS;  // central chunk is at index 4 in the 3x3 grid of chunks
         const size_t endIndex = startIndex + config::generation::NUM_POINTS;

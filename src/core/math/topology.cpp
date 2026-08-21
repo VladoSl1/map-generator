@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstddef>
 
+#include "core/math/constants.hpp"
 #include "core/utils/debug.hpp"
 
 
@@ -43,14 +44,13 @@ namespace math
     */
     PolygonI getIndicesPolygon(const std::vector<EdgeI>& edges, const PolygonI& edgePolygon)
     {
-        constexpr size_t MAX_LOCAL = 32;
-
         const size_t vertexCount = edgePolygon.size();
+
         assert(vertexCount >= 3 && "edgePolygon must have at least 3 edges");
-        assert(vertexCount <= MAX_LOCAL && "polygon degree exceeds bitmask capacity - increase MAX_LOCAL");
+        assert(vertexCount <= MAX_POLYGON_DEGREE && "polygon degree exceeds bitmask capacity - increase MAX_LOCAL");
 
         // preload edges into a local array to avoid cache misses
-        std::array<EdgeI, MAX_LOCAL> localEdges;
+        std::array<EdgeI, MAX_POLYGON_DEGREE> localEdges;
         for (size_t i = 0; i < vertexCount; ++i)
         {
             localEdges[i] = edges[edgePolygon[i]];

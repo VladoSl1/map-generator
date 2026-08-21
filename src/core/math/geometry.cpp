@@ -13,6 +13,7 @@ namespace math
     std::optional<Point2Dd> calculateCircumcenter(const Point2Dd& A, const Point2Dd& B, const Point2Dd& C)
     {
         const double D = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
+
         if (std::abs(D) < EPSILON)
         {
             return std::nullopt; // Points are collinear; circumcenter is undefined.
@@ -52,8 +53,7 @@ namespace math
         assert(indices.size() >= 3 && "Polygon must have at least 3 vertices to calculate centroid.");
 
         double signedArea = 0.0;
-        double cx = 0.0;
-        double cy = 0.0;
+        Point2Dd centroid{0.0, 0.0};
 
         for (size_t i = 0; i < indices.size(); ++i)
         {
@@ -62,18 +62,27 @@ namespace math
 
             double crossProduct = (v1.x * v2.y - v2.x * v1.y);
             signedArea += crossProduct;
-            cx += (v1.x + v2.x) * crossProduct;
-            cy += (v1.y + v2.y) * crossProduct;
+            centroid += (v1 + v2) * crossProduct;
         }
 
         signedArea /= 2.0;
 
-        cx /= (6.0 * signedArea);
-        cy /= (6.0 * signedArea);
+        if (std::abs(signedArea) < EPSILON)
+        {
+            // degenerate polygon, return the average of the vertices as a fallback
+            centroid = {0.0, 0.0};
+            for (const auto& index : indices)
+            {
+                centroid += points[index];
+            }
+            centroid /= static_cast<double>(indices.size());
+        }
+        else
+        {
+            centroid /= (6.0 * signedArea);
+        }
 
-        return {cx, cy};
-
-
+        return centroid;
     }
 
 }

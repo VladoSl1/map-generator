@@ -61,9 +61,9 @@ int main()
                 for (const auto& chunk : chunks)
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
-                     // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
-                    renderer::renderChunk(*chunk);
+                    // renderer::renderChunk(*chunk);
 
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);

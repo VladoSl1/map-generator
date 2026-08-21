@@ -52,6 +52,9 @@ namespace generation
     public:
         explicit ChunkManager(int worldSeed);
 
+        /* TODO: make this assynchronous
+         * Prerequsite: first optimize single thread (see topology.cpp)
+         */
         void loadChunk(math::Point2Di chunkCoords);
         void removeChunk(math::Point2Di chunkCoords);
 

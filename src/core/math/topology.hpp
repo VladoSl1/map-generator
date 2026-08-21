@@ -32,19 +32,21 @@ namespace math
     using EdgeI     = IndexPrimitive<2>;
     using TriangleI = IndexPrimitive<3>;
 
+    inline constexpr size_t MAX_POLYGON_DEGREE = 32;
+    static_assert(MAX_POLYGON_DEGREE <= 64, "bitmask is 64 bits wide");
     /* TODO: consider using std::array for PolygonI
      * advantages: no heap allocation
      * such approach improved performance of getIndicesPolygon
      */
     using PolygonI = IndexContainer<std::vector<size_t>>;
-    // using PolygonI = IndexPrimitive<32>;
 
     bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
     PolygonI getIndicesPolygon(const std::vector<EdgeI>& edges,
                                const PolygonI& edgePolygon);
 
-    /* Converts e.g. triangle indices to edges. Edge elements are sorted */
+    /* Converts e.g. triangle indices to edges. Edge elements are sorted. We are assuming
+     * that the IndexPrimitive creates cycle from vertices */
     template<size_t N>
     std::array<EdgeI, N> convertToEdges(const IndexPrimitive<N>& primitive)
     {

@@ -27,7 +27,7 @@ namespace config
 
         inline constexpr float CONTINENTAL_SCALE = 2000.0f;
         inline constexpr float MOUNTAIN_SCALE = 150.0f;
-        inline constexpr char *ELEVATION_NODE_TREE_ENCODED = "KAAC@BER4JKQkNAAU@BIpHD9PwkG@BlkMEA65H4T4L4XqUPwQTAACAvwwQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HAMAACBCBBM@B/BA==";
+        inline constexpr const char *ELEVATION_NODE_TREE_ENCODED = "KAAC@BER4JKQkNAAU@BIpHD9PwkG@BlkMEA65H4T4L4XqUPwQTAACAvwwQAABgFUQYuB6FvgkWCiQIw/UoPwkuAAE@BJDQAH@BC@AIEAJBw@ABZEED0KV78YZmZmPwQDmpkZPwsAAIA/HAMAACBCBBM@B/BA==";
 
         /* If moisture scale were the same as continental scale, moisture map would mirror continental map,
          * which would create uniform biomes across the map. */
