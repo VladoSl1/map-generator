@@ -5,6 +5,7 @@
 #include "core/math/sorting.hpp"
 #include "core/math/constants.hpp"
 
+#include "core/math/topology.hpp"
 #include "delaunay_triangulation.hpp"
 
 #include "core/utils/debug.hpp"
@@ -122,7 +123,7 @@ namespace generation::pipeline
             {
                 // the edges are not ordered
                 // there are rouhgly ~30 open polygons out of 27000 polygons, so this approach should be fast enough
-                std::vector<size_t> vertIndices;
+                math::PolygonIContainer vertIndices;
                 for (size_t edgeIdx : polygons[p].indices)
                 {
                     const auto& edge = edges[edgeIdx];

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "static_vector.hpp"
+
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -34,11 +36,8 @@ namespace math
 
     inline constexpr size_t MAX_POLYGON_DEGREE = 32;
     static_assert(MAX_POLYGON_DEGREE <= 64, "bitmask is 64 bits wide");
-    /* TODO: consider using std::array for PolygonI
-     * advantages: no heap allocation
-     * such approach improved performance of getIndicesPolygon
-     */
-    using PolygonI = IndexContainer<std::vector<size_t>>;
+    using PolygonIContainer = StaticVector<size_t, MAX_POLYGON_DEGREE>;
+    using PolygonI = IndexContainer<PolygonIContainer>;
 
     bool doesShareEdge(const TriangleI& triangleA, const TriangleI& triangleB);
 
