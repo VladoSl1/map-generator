@@ -15,7 +15,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-use-nodiscard,
   -readability-identifier-length,
-  -readability-math-missing-parentheses
+  -readability-math-missing-parentheses,
   -modernize-use-designated-initializers
 
 HeaderFilterRegex: '^(?!.*(external|_deps)).*'
@@ -28,3 +28,5 @@ CheckOptions:
     value:           'llvm'
   - key:             readability-uppercase-literal-suffix.NewSuffixes
     value:           'L;LL;U;f'
+  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: 'true'

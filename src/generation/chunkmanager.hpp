@@ -52,9 +52,7 @@ namespace generation
     public:
         explicit ChunkManager(int worldSeed);
 
-        /* TODO: make this assynchronous
-         * Prerequsite: first optimize single thread (see topology.cpp)
-         */
+        /* TODO: make this non-blocking */
         void loadChunk(math::Point2Di chunkCoords);
         void removeChunk(math::Point2Di chunkCoords);
 
@@ -78,7 +76,7 @@ namespace generation
 
     private:
         uint64_t m_worldSeed;
-        std::unordered_map<uint64_t, std::shared_ptr<Chunk>> chunks; // TODO: consider using unique_ptr
+        std::unordered_map<uint64_t, std::shared_ptr<Chunk>> chunks;
 
         terrain::TerrainNoiseMap terrainNoiseMap;
 

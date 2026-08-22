@@ -15,9 +15,9 @@ namespace config
 
     namespace generation
     {
-        inline constexpr int SEED = 0;  // 0 for random seed, any other number for specific constant
+        inline constexpr int SEED = 42;  // 0 for random seed, any other number for specific constant
 
-        inline constexpr int NUM_POINTS = 3000;
+        inline constexpr int NUM_POINTS = 2000;
         inline constexpr int CHUNK_WIDTH = 1000;
         inline constexpr int CHUNK_HEIGHT = 1000;
         inline constexpr int RELAXATION_ITERATIONS = 2;
@@ -51,8 +51,8 @@ namespace config
         inline constexpr math::Point2Df DEFAULT_CAMERA_POSITION{0.0f, 0.0f};
         inline constexpr int CHUNK_RENDER_DISTANCE = 0;
 
-        inline constexpr float SNOW_LINE_ELEVATION    = 1.f;
-        inline constexpr float SNOW_LINE_TEMP_STRENGTH = 0.3f;
+        inline constexpr float SNOW_LINE_ELEVATION    = 0.6f;
+        inline constexpr float SNOW_LINE_TEMP_STRENGTH = 0.7f;
     }
 }
 

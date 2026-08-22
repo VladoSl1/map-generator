@@ -41,8 +41,14 @@ namespace renderer
     {
         t = std::clamp(t, 0.0f, 1.0f);
 
-        if (t <= stops[0].position)         return stops[0].color;
-        if (t >= stops[N - 1].position) return stops[N - 1].color;
+        if (t <= stops[0].position)
+        {
+            return stops[0].color;
+        }
+        if (t >= stops[N - 1].position)
+        {
+            return stops[N - 1].color;
+        }
 
         for (size_t i = 0; i + 1 < N; ++i)
         {

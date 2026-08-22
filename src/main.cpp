@@ -34,7 +34,7 @@ int main()
         seed = utils::getRandomNumber<int>({1, std::numeric_limits<int>::max()}, seed);
     }
 
-    auto chunkManager = std::make_shared<generation::ChunkManager>(42);
+    auto chunkManager = std::make_shared<generation::ChunkManager>(seed);
 
     auto chunks = chunkManager->listAllChunks();
     // auto voronoiDiagram = chunkManager.listAllChunks()[0]->voronoiDiagram;
@@ -61,9 +61,9 @@ int main()
                 for (const auto& chunk : chunks)
                 {
                     voronoiDiagram = chunk->voronoiDiagram;
-                     renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
+                     // renderer::renderPolygons(voronoiDiagram, LIGHTGRAY);
 
-                    // renderer::renderChunk(*chunk);
+                    renderer::renderChunk(*chunk);
 
                     // renderer::renderPoints(voronoiDiagram.seeds, RED);
                     // renderer::renderPoints(voronoiDiagram.vertices, BLUE);
