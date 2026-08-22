@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstddef>
 
+#include "core/math/constants.hpp"
 #include "core/utils/debug.hpp"
 
 
@@ -37,55 +38,61 @@ namespace math
      *     by iterating through all edges in the polygon
      *  3. Add the other vertex of the found edge to the polygon
     * This O(n^2) algorithm should be faster then linear algorithm which uses hash table
-    * We are working with polygons of sizes roughly 3-8.
+    * Preloading edges into stack array speeds up the algorithm by avoiding cache misses when accessing edges vector
+    * (this happend in every iteration of the inner loop).
     *
-    * TODO: consider using vector instead of array
-    * TODO: consider preloading the edges into smaller array to avoid cache misses
     */
-    PolygonI getIndicesPolygon(const std::vector<EdgeI>& edges,
-                               const PolygonI& edgePolygon)
+    PolygonI getIndicesPolygon(const std::vector<EdgeI>& edges, const PolygonI& edgePolygon)
     {
-        assert(edgePolygon.size() >= 3 && "edgePolygon must have at least 3 edges");
+        const size_t vertexCount = edgePolygon.size();
+
+        assert(vertexCount >= 3 && "edgePolygon must have at least 3 edges");
+        assert(vertexCount <= MAX_POLYGON_DEGREE && "polygon degree exceeds bitmask capacity - increase MAX_LOCAL");
+
+        // preload edges into a local array to avoid cache misses
+        std::array<EdgeI, MAX_POLYGON_DEGREE> localEdges;
+        for (size_t i = 0; i < vertexCount; ++i)
+        {
+            localEdges[i] = edges[edgePolygon[i]];
+        }
 
         PolygonI indicesPolygon;
-        const size_t vertexCount = edgePolygon.size();
-        indicesPolygon.indices.reserve(vertexCount);
+        indicesPolygon.indices.resize(vertexCount);
 
-        std::vector<bool> usedEdges(vertexCount, false);
+        indicesPolygon.indices[0] = localEdges[0][0];
+        size_t currentVertex = localEdges[0][1];
 
-        usedEdges[0] = true;
-        const EdgeI& firstEdge = edges[edgePolygon[0]];
-        indicesPolygon.indices.push_back(firstEdge[0]);
-        size_t currentVertex = firstEdge[1];
+        uint64_t usedMask = 1ull;  // already processed the first edge (index 0)
 
         // starting from one since we already processed the first edge
         for (size_t i = 1; i < vertexCount; ++i)
         {
-            indicesPolygon.indices.push_back(currentVertex);
+            indicesPolygon.indices[i] = currentVertex;
 
             for (size_t j = 1; j < vertexCount; ++j)
             {
-                if (usedEdges[j])
+                const size_t comparedEdgeMask = 1ull << j;
+                if (usedMask & comparedEdgeMask)
                 {
                     continue;
                 }
 
-                const EdgeI& edge = edges[edgePolygon[j]];
+                const EdgeI& edge = localEdges[j];
                 if (edge[0] == currentVertex)
                 {
                     currentVertex = edge[1];
-                    usedEdges[j] = true;
+                    usedMask |= comparedEdgeMask;
                     break;
                 }
                 if (edge[1] == currentVertex)
                 {
                     currentVertex = edge[0];
-                    usedEdges[j] = true;
+                    usedMask |= comparedEdgeMask;
                     break;
                 }
             }
         }
 
-        return std::move(indicesPolygon);
+        return indicesPolygon;
     }
 }

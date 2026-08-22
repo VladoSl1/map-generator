@@ -3,7 +3,9 @@
 #include "core/math/geometry.hpp"
 #include "core/math/point2d.hpp"
 #include "core/math/sorting.hpp"
+#include "core/math/constants.hpp"
 
+#include "core/math/topology.hpp"
 #include "delaunay_triangulation.hpp"
 
 #include "core/utils/debug.hpp"
@@ -87,7 +89,7 @@ namespace generation::pipeline
             if (i+1 < triangleEdgesWithId.size() &&
                 triangleEdgesWithId[i].edge.indices == triangleEdgesWithId[i+1].edge.indices)
             {
-                // edge shared by 2 Delaunay triangles (Internal Polygon Edge)
+                // edge shared by 2 delaunay triangles
                 edges.push_back(
                     math::EdgeI{triangleEdgesWithId[i].triangleId, triangleEdgesWithId[i+1].triangleId}
                 );
@@ -97,7 +99,7 @@ namespace generation::pipeline
 
                 i += 2;
             }
-            else // the edge should go to ininite polygon (External Polygon Edge)
+            else // the edge should go to ininite polygon
             {
                 openPolygons[triangleEdgesWithId[i].edge[0]] = true;
                 openPolygons[triangleEdgesWithId[i].edge[1]] = true;
@@ -119,8 +121,9 @@ namespace generation::pipeline
         {
             if (openPolygons[p])
             {
-                // TODO: right now we are just collecting all vertices of the edges, but they are not ordered
-                std::vector<size_t> vertIndices;
+                // the edges are not ordered
+                // there are rouhgly ~30 open polygons out of 27000 polygons, so this approach should be fast enough
+                math::PolygonIContainer vertIndices;
                 for (size_t edgeIdx : polygons[p].indices)
                 {
                     const auto& edge = edges[edgeIdx];
@@ -190,29 +193,17 @@ namespace generation::pipeline
 
             for (size_t oldVertIdx : polygons[i].indices)
             {
-                // If the vertex hasn't been added to the subset yet, map and push it
+                // if the vertex hasn't been added to the subset yet, map and push it
                 if (vertexMap[oldVertIdx] == UNMAPPED)
                 {
                     vertexMap[oldVertIdx] = subsetVoronoi.vertices.size();
                     subsetVoronoi.vertices.push_back(vertices[oldVertIdx]);
                 }
 
-                // Add the newly mapped vertex index to the local polygon
+                // add the newly mapped vertex index to the local polygon
                 subsetVoronoi.polygons[localIndex].indices.push_back(vertexMap[oldVertIdx]);
             }
         }
-
-        // for (const auto& edge : edges)
-        // {
-        //     size_t newV1 = vertexMap[edge[0]];
-        //     size_t newV2 = vertexMap[edge[1]];
-        //
-        //     // retain only edges where both vertices exist in this subset
-        //     if (newV1 != UNMAPPED && newV2 != UNMAPPED)
-        //     {
-        //         subsetVoronoi.edges.push_back(math::EdgeI{{newV1, newV2}});
-        //     }
-        // }
 
         return subsetVoronoi;
     }
@@ -223,21 +214,12 @@ namespace generation::pipeline
 
         for (size_t i = 0; i < polygons.size(); ++i)
         {
-            if (!isPolygonClosed(i))
+            if (!isPolygonClosed(i) || polygons[i].indices.empty())
             {
                 continue;
             }
 
-            math::Point2Dd centroid{0, 0};
-            for (const auto& vertexIndex : polygons[i].indices)
-            {
-                centroid += vertices[vertexIndex].cast<double>();
-            }
-
-            if (!polygons[i].indices.empty())
-            {
-                newSeeds[i] = math::calculatePolygonCentroid(vertices, polygons[i]);
-            }
+            newSeeds[i] = math::calculatePolygonCentroid(vertices, polygons[i]);
         }
 
         if (fixedTopology)
@@ -274,7 +256,7 @@ namespace generation::pipeline
             }
             else  // triangle is degenerate, circumcenter is undefined
             {
-                // Fallback to the centroid of the triangle
+                // fallback to the centroid of the triangle
                 voronoiVertices.push_back((trianglePoints[a] + trianglePoints[b] + trianglePoints[c]) / 3.0);
             }
         }
