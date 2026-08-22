@@ -4,8 +4,9 @@
 #include <chrono>
 #include <unordered_map>
 
-
-#define DEBUG_FLAG
+#ifndef NDEBUG
+    #define DEBUG_FLAG
+#endif
 
 template <typename... Args>
 void log(Args&&... args) {

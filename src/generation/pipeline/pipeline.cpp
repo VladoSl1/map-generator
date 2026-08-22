@@ -14,15 +14,15 @@ namespace generation::pipeline
 {
     DynamicVoronoiDiagram generateFromPoints(std::vector<math::Point2Dd> seedPoints)
     {
-        startClock("Generating Voronoi diagram from points");
+        // startClock("Generating Voronoi diagram from points");
         auto triangles = pipeline::triangulate(seedPoints);
-        stopClock("Generating Voronoi diagram from points");
+        // stopClock("Generating Voronoi diagram from points");
 
         DynamicVoronoiDiagram voronoiDiagram;
 
-        startClock("Generating Voronoi diagram from triangles");
+        // startClock("Generating Voronoi diagram from triangles");
         voronoiDiagram.generate(std::move(seedPoints), std::move(triangles));
-        stopClock("Generating Voronoi diagram from triangles");
+        // stopClock("Generating Voronoi diagram from triangles");
 
         return voronoiDiagram;
     }

@@ -34,7 +34,7 @@ int main()
         seed = utils::getRandomNumber<int>({1, std::numeric_limits<int>::max()}, seed);
     }
 
-    auto chunkManager = std::make_shared<generation::ChunkManager>(42);
+    auto chunkManager = std::make_shared<generation::ChunkManager>(seed);
 
     auto chunks = chunkManager->listAllChunks();
     // auto voronoiDiagram = chunkManager.listAllChunks()[0]->voronoiDiagram;

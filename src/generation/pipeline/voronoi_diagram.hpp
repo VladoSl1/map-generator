@@ -11,7 +11,7 @@ namespace generation::pipeline
     {
         std::vector<math::Point2Dd> seeds;
         std::vector<math::Point2Dd> vertices;
-        std::vector<math::PolygonI> polygons;  // Polygon elements are indices of vertices
+        std::vector<math::PolygonI> polygons;  // Polygon elements are indices of vertices in clock-wise order, open polygons have random ordering
         std::vector<bool> openPolygons;        // True if polygon is open to infinity
 
         virtual void clear();
@@ -28,7 +28,12 @@ namespace generation::pipeline
                       std::vector<math::TriangleI> triangleIndices);
 
         /* alg: https://en.wikipedia.org/wiki/Lloyd%27s_algorithm
-         * fixedTopology: Difference from the original algorithm is that we are not recalculating the Voronoi diagram from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.
+         * fixedTopology: Difference from the original algorithm is that we are not recalculating the Voronoi diagram
+         * from seeds, but rather keeping the same topology and just moving the seeds to the centroids of their polygons.
+         * fixedTopology is faster, but with small number of relaxation the topology is changing (the edges get tangled)
+         * WARNING: it is highly recommended to apply non-fixed relaxation after each fixed topology relaxation
+         * (otherwise the diagram degenerates). It is also recommended to do several non-fixed relaxations before
+         * doing any fixed
          * */
         void relax(bool fixedTopology = false);
         void clear() override;

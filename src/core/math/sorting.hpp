@@ -4,22 +4,29 @@
 
 namespace math
 {
+    /* elements are sorted based on the value of proj(element) */
     template<typename T, typename Proj>
     void countingSort(std::vector<T>& elements, Proj proj)
     {
         // TODO: consider maybe for better performance adding buffering to avoid multiple allocations
-        // TODO: is this function maybe to abstract?
         // TODO: the sort assumes that the projected values are in range [0, elemts.size())]
 
         const int n = elements.size();
-        if (n <= 1) return;
+        if (n <= 1)
+        {
+            return;
+        }
 
         std::vector<size_t> counts(n, 0);
 
         // count how many times each mapped value appears
         for (const auto& element : elements)
         {
-            counts[proj(element)]++;
+            int x = proj(element);
+
+            assert(x <= n && "Values in elements are not in expected range [0, elements.size())");
+
+            counts[x]++;
         }
 
         // convert counts to prefix sums to determine the final index positions
@@ -28,7 +35,7 @@ namespace math
             counts[i] += counts[i - 1];
         }
 
-        // build the sorted output array
+        // construct the sorted output array
         std::vector<T> output(n);
         for (int i = static_cast<int>(n) - 1; i >= 0; --i)
         {
