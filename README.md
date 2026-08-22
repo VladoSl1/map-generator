@@ -1,5 +1,7 @@
 # Realistic map generator
 
+![Preview image](images/preview.jpg)
+
 A procedurally generated, infinite 2D world map. Terrain is built on Voronoi diagram, colored based on layered noise for elevation, moisture and temperature. The world is generated in realtime based on the camera position and rendered with Raylib.
 
 The realism that we hope to achieve is not photorealistic rendering, but rather mimicking real-world processes (geology, climatology) as generation rules instead of pure noise. For more information visit wiki page.
@@ -21,6 +23,7 @@ wiki page before building.
 
 ### Build
 We are using [Ninja](https://ninja-build.org/) as build system generator, but you can fallback to default one if you do not have it installed by ommiting `-G Ninja`.
+For better performance add `-DCMAKE_BUILD_TYPE=Release`.
 ```bash
 cmake -B build -G Ninja
 ```
