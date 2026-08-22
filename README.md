@@ -1,6 +1,6 @@
 # Realistic map generator
 
-![Preview image](images/preview.jpg)
+<img src="images/preview.jpg" width="500" alt="Preview image">
 
 A procedurally generated, infinite 2D world map. Terrain is built on Voronoi diagram, colored based on layered noise for elevation, moisture and temperature. The world is generated in realtime based on the camera position and rendered with Raylib.
 
