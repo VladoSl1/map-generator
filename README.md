@@ -52,4 +52,6 @@ Windows:
 | Move camera | Hold left mouse button + drag |
 | Zoom | Mouse wheel |
 
-# License
+## License
+
+This project is licensed under the [MIT License](LICENSE).
