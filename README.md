@@ -4,7 +4,7 @@
 
 A procedurally generated, infinite 2D world map. Terrain is built on Voronoi diagram, colored based on layered noise for elevation, moisture and temperature. The world is generated in realtime based on the camera position and rendered with Raylib.
 
-The realism that we hope to achieve is not photorealistic rendering, but rather mimicking real-world processes (geology, climatology) as generation rules instead of pure noise. For more information visit wiki page.
+The realism that we hope to achieve is not photorealistic rendering, but rather mimicking real-world processes (geology, climatology) as generation rules instead of pure noise. For more information visit [Realism wiki page](Realism).
 
 ## How to run
 
